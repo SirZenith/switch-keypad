@@ -1,19 +1,12 @@
+#pragma once
+
+#include "KeyPad.h"
+#include "key_name_macro.h"
 #include <SwitchControlLibrary.h>
 
 namespace config {
-    enum Operation {
-        EMPTY,
-        DELAY,
-        KEY,
-        HAT,
-        MACRO,
-        END,
-    };
-
-    struct Record {
-        Operation type;
-        int param;
-    };
+    using keypad::Operation;
+    using keypad::Record;
 
     const int row = 2;
     const int col = 3;
@@ -23,18 +16,18 @@ namespace config {
 
     Record *keyMap[6] = {
         (Record[]){
-            {Operation::KEY, Button::A},
-            {Operation::HAT, HatButton::UP},
-            {Operation::MACRO, 0},
-            // -------------------------
-            {Operation::KEY, Button::B},
-            {Operation::HAT, HatButton::DOWN},
-            {Operation::MACRO, 1},
+            // row 1
+            BTN_A, HAT_BTN_UP, MACRO(0),
+            // row 2
+            BTN_B, HAT_BTN_DOWN, MACRO(1),
         },
     };
 
+    const int DEBOUNCE = 1;
+    const int HOLD_THRESHOLD = 500;
+
     const int CLICK_DELAY = 80;
-    const int CHANGE_KEY_DELAY = 80;
+    const int KEY_END_DELAY = 80;
     const int SMALL_DIALOG_DELAY = 250;
     const int MEDIUM_DIALOG_DELAY = 500;
     const int LARGE_DIALOG_DELAY = 800;
@@ -42,60 +35,59 @@ namespace config {
 
     Record *macroList[] = {
         (Record[]){
-            {Operation::KEY, Button::A},
-            {Operation::DELAY, SMALL_DIALOG_DELAY},
+            BTN_A,
+            DELAY(SMALL_DIALOG_DELAY),
 
-            {Operation::HAT, HatButton::DOWN},
-            {Operation::HAT, HatButton::DOWN},
-            {Operation::HAT, HatButton::DOWN},
-            {Operation::HAT, HatButton::DOWN},
-            {Operation::HAT, HatButton::DOWN},
-            {Operation::KEY, Button::A},
-            {Operation::DELAY, LARGE_DIALOG_DELAY},
+            HAT_BTN_DOWN,
+            HAT_BTN_DOWN,
+            HAT_BTN_DOWN,
+            HAT_BTN_DOWN,
+            HAT_BTN_DOWN,
+            BTN_A,
+            DELAY(LARGE_DIALOG_DELAY),
 
-            {Operation::KEY, Button::A},
-            {Operation::KEY, Button::A},
-            {Operation::DELAY, MENU_LOAD_DELAY},
+            BTN_A,
+            BTN_A,
+            DELAY(MENU_LOAD_DELAY),
 
-            {Operation::KEY, Button::A},
-            {Operation::HAT, HatButton::UP},
-            {Operation::HAT, HatButton::RIGHT},
-            {Operation::HAT, HatButton::DOWN},
-            {Operation::HAT, HatButton::DOWN},
-            {Operation::KEY, Button::A},
+            BTN_A,
+            HAT_BTN_UP,
+            HAT_BTN_RIGHT,
+            HAT_BTN_DOWN,
+            HAT_BTN_DOWN,
+            BTN_A,
 
-            {Operation::DELAY, MENU_LOAD_DELAY},
+            DELAY(MENU_LOAD_DELAY),
 
-            {Operation::KEY, Button::X},
-            {Operation::KEY, Button::X},
-            {Operation::KEY, Button::L},
+            BTN_X,
+            BTN_X,
+            BTN_L,
 
-            {Operation::KEY, Button::A},
+            BTN_A,
 
-            {Operation::DELAY, SMALL_DIALOG_DELAY},
+            DELAY(SMALL_DIALOG_DELAY),
 
-            {Operation::HAT, HatButton::DOWN},
-            {Operation::HAT, HatButton::DOWN},
-            {Operation::HAT, HatButton::DOWN},
-            {Operation::KEY, Button::A},
+            HAT_BTN_DOWN,
+            HAT_BTN_DOWN,
+            HAT_BTN_DOWN,
+            BTN_A,
 
-            {Operation::DELAY, MEDIUM_DIALOG_DELAY},
+            DELAY(MEDIUM_DIALOG_DELAY),
 
-            {Operation::KEY, Button::B},
+            BTN_B,
 
-            {Operation::DELAY, MENU_LOAD_DELAY},
+            DELAY(MENU_LOAD_DELAY),
 
-            {Operation::HAT, HatButton::UP},
-            {Operation::HAT, HatButton::LEFT},
-            {Operation::HAT, HatButton::UP},
-            {Operation::HAT, HatButton::UP},
+            HAT_BTN_UP,
+            HAT_BTN_LEFT,
+            HAT_BTN_UP,
+            HAT_BTN_UP,
 
-            {Operation::END, 1},
+            END(true),
         },
         (Record[]){
-            {Operation::KEY, Button::A},
-            {Operation::KEY, Button::B},
-            {Operation::END, 0},
-        }
-    };
+            BTN_A,
+            BTN_B,
+            END(false),
+        }};
 };
