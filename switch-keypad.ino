@@ -1,9 +1,7 @@
-#include "src/KeyPad.h"
 #include "config/config.h"
+#include "src/KeyPad.h"
 
-using keypad::KeyPad;
-
-KeyPad pad = KeyPad(
+auto pad = keypad::KeyPad(
     config::row, config::col, config::layer,
     config::rowPinList, config::colPinList,
     config::keyMap, config::macroList,
@@ -13,7 +11,13 @@ KeyPad pad = KeyPad(
 
 void setup() {
     SwitchControlLibrary();
+
+#ifdef DEBUG
     Serial.begin(115200);
+#endif
+
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, LOW);
 
     for (int r = 0; r < config::row; ++r) {
         int rowPin = config::rowPinList[r];

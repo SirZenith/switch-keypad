@@ -7,6 +7,7 @@ namespace keypad {
     class LayeringState {
     public:
         static const int MAX_LAYER_CNT = 32;
+        static const int NO_LAYER = -1;
 
         int SetLayerCnt(int cnt);
         int SetDefaultLayer(int layer);
@@ -22,7 +23,6 @@ namespace keypad {
 
     private:
         static constexpr unsigned long LAYER_CHECK_MASK = ~(ULONG_MAX >> 1);
-        static const int NO_LAYER = -1;
 
         unsigned long layerStateRecord = 0;
         int defaultLayer = 0;
@@ -30,6 +30,7 @@ namespace keypad {
         int curLayer = 0;
         int oneShotLayer = NO_LAYER;
 
+        void OperationLog(const char *msg, unsigned long param);
         void UpdateCurLayer();
     };
 }

@@ -8,12 +8,16 @@ namespace config {
 
     Record *keyMap[] = {
         (Record[]){
-            EMPTY, HAT_BTN_UP, TL(1),
+            MACRO(1)    , HAT_BTN_UP  , OSL(1)       ,
             HAT_BTN_LEFT, HAT_BTN_DOWN, HAT_BTN_RIGHT,
         },
         (Record[]){
-            BTN_X, BTN_A, TL(1),
-            BTN_Y, BTN_B, EMPTY,
+            BTN_X       , BTN_A       , EMPTY        ,
+            BTN_Y       , BTN_B       , TL(2)        ,
         },
+        (Record[]){
+            MACRO(0)    , EMPTY       , TL(2)        ,
+            EMPTY       , EMPTY       , DFL(1)       ,
+        }
     };
 }

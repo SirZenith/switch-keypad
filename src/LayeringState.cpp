@@ -21,6 +21,7 @@ int keypad::LayeringState::SetDefaultLayer(int layer) {
         defaultLayer = layer;
     }
 
+    OperationLog("set-default", defaultLayer);
     return defaultLayer;
 }
 
@@ -35,22 +36,28 @@ bool keypad::LayeringState::IsInOneShotState() {
 // ----------------------------------------------------------------------------
 
 void keypad::LayeringState::ActivateLayer(int layer) {
-    unsigned long mask = 1 << layer;
-    if (layerStateRecord & mask == 0) {
+    OperationLog("goto", layer);
+
+    unsigned long mask = 1UL << layer;
+    if (!(layerStateRecord & mask)) {
         layerStateRecord |= mask;
         UpdateCurLayer();
     }
 }
 
 void keypad::LayeringState::DeactivateLayer(int layer) {
-    unsigned long mask = 1 << layer;
-    if (layerStateRecord & mask == 1) {
+    OperationLog("leave", layer);
+
+    unsigned long mask = 1UL << layer;
+    if (layerStateRecord & mask) {
         layerStateRecord &= ~mask;
         UpdateCurLayer();
     }
 }
 
 void keypad::LayeringState::ToggleLayer(int layer) {
+    OperationLog("toggle", layer);
+
     layerStateRecord ^= 1UL << layer;
     UpdateCurLayer();
 }
@@ -58,12 +65,16 @@ void keypad::LayeringState::ToggleLayer(int layer) {
 // ----------------------------------------------------------------------------
 
 void keypad::LayeringState::OneShotLayerOn(int layer) {
+    OperationLog("onshot-on", layer);
+
     ActivateLayer(layer);
     oneShotLayer = layer;
     UpdateCurLayer();
 }
 
 void keypad::LayeringState::OneShotLayerOff() {
+    OperationLog("oneshot-off", NO_LAYER);
+
     DeactivateLayer(oneShotLayer);
     oneShotLayer = NO_LAYER;
     UpdateCurLayer();
@@ -71,14 +82,41 @@ void keypad::LayeringState::OneShotLayerOff() {
 
 // ----------------------------------------------------------------------------
 
+void keypad::LayeringState::OperationLog(const char *msg, unsigned long param) {
+#ifdef DEBUG
+    Serial.print("layering: ");
+    Serial.print(msg);
+    if (param != NO_LAYER) {
+        Serial.print("(");
+        Serial.print(param);
+        Serial.print(")");
+    }
+    Serial.print("\n");
+#endif
+}
+
 void keypad::LayeringState::UpdateCurLayer() {
     curLayer = defaultLayer;
+#ifdef DEBUG
+    bool isDirty = false;
+#endif
 
     unsigned long value = layerStateRecord << (MAX_LAYER_CNT - layerCnt);
     for (int l = layerCnt - 1; l >= 0; --l, value <<= 1) {
         if (value & LAYER_CHECK_MASK) {
+            OperationLog("update-layer", l);
+
             curLayer = l;
+#ifdef DEBUG
+            isDirty = true;
+#endif
             break;
         }
     }
+
+#ifdef DEBUG
+    if (!isDirty) {
+        OperationLog("to-default", NO_LAYER);
+    }
+#endif
 }

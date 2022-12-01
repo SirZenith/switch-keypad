@@ -81,3 +81,27 @@ using keypad::Operation;
     { Operation::HAT_BTN, HatButton::RIGHT }
 #define HAT_BTN_LEFT \
     { Operation::HAT_BTN, HatButton::LEFT }
+
+#define STICK_VALUE(x, y) (x << sizeof(uint8_t) | y)
+
+#define L_STICK_UP \
+    { Operation::L_STICK, STICK_VALUE(Stick::NEUTRAL, Stick::MAX) }
+#define L_STICK_DOWN \
+    { Operation::L_STICK, STICK_VALUE(Stick::NEUTRAL, Stick::MIN) }
+#define L_STICK_LEFT \
+    { Operation::L_STICK, STICK_VALUE(Stick::MIN, Stick::NEUTRAL) }
+#define L_STICK_RIGHT \
+    { Operation::L_STICK, STICK_VALUE(Stick::MAX, Stick::NEUTRAL) }
+#define L_STICK_FREE(x, y) \
+    { Operation::L_STICK, STICK_VALUE(x, y) }
+
+#define R_STICK_UP \
+    { Operation::R_STICK, STICK_VALUE(Stick::NEUTRAL, Stick::MAX) }
+#define R_STICK_DOWN \
+    { Operation::R_STICK, STICK_VALUE(Stick::NEUTRAL, Stick::MIN) }
+#define R_STICK_LEFT \
+    { Operation::R_STICK, STICK_VALUE(Stick::MIN, Stick::NEUTRAL) }
+#define R_STICK_RIGHT \
+    { Operation::R_STICK, STICK_VALUE(Stick::MAX, Stick::NEUTRAL) }
+#define R_STICK_FREE(x, y) \
+    { Operation::R_STICK, STICK_VALUE(x, y) }
