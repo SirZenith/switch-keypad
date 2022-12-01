@@ -14,6 +14,19 @@ using keypad::Operation;
 #define END(isRepeat) \
     { Operation::END, isRepeat }
 
+// ----------------------------------------------------------------------------
+
+#define ML(layer) \
+    { Operation::MOMENT_LAYER, layer }
+#define OSL(layer) \
+    { Operation::ONE_SHOT_LAYER, layer }
+#define TL(layer) \
+    { Operation::TOGGLE_LAYER, layer }
+#define DFL(layer) \
+    { Operation::DEFAULT_LAYER, layer }
+
+// ----------------------------------------------------------------------------
+
 #define BTN_A \
     { Operation::BTN, Button::A }
 #define BTN_B \

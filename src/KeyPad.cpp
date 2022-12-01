@@ -1,20 +1,21 @@
 #include "KeyPad.h"
 
-using namespace keypad;
+// ----------------------------------------------------------------------------
 
-KeyPad::KeyPad(
+keypad::KeyPad::KeyPad(
     int row, int col, int layer,
     int *rowPinList, int *colPinList,
     Record **keyMap, Record **macroList,
-    int debounce, int holdThreshold,
-    int clickDelay, int changeKeyDelay
+    unsigned long debounce, unsigned long holdThreshold,
+    unsigned long clickDelay, unsigned long changeKeyDelay
 ) : row{row},
     col{col},
-    layer{layer},
+    // ------------------------------------------------------------------------
     rowPinList{rowPinList},
     colPinList{colPinList},
     keyMap{keyMap},
     macroList{macroList},
+    // ------------------------------------------------------------------------
     debounce{debounce},
     holdThreshold{holdThreshold},
     clickDelay{clickDelay},
@@ -24,9 +25,14 @@ KeyPad::KeyPad(
     for (int r = 0; r < row; ++r) {
         keyMatrix[r] = new Key[col];
     }
+
+    layeringState = LayeringState();
+    layeringState.SetLayerCnt(layer);
+
+    curMacro = MacroRecord();
 }
 
-KeyPad::~KeyPad() {
+keypad::KeyPad::~KeyPad() {
     for (int r = 0; r < row; ++r) {
         delete[] keyMatrix[r];
     }
@@ -35,21 +41,24 @@ KeyPad::~KeyPad() {
 
 // ----------------------------------------------------------------------------
 
-void KeyPad::Scan() {
+void keypad::KeyPad::Scan() {
     if (isScanning) {
         return;
     }
 
     isScanning = true;
+    unsigned long now = micros();
 
     for (int r = 0; r < row; ++r) {
         digitalWrite(rowPinList[r], LOW);
 
         for (int c = 0; c < col; ++c) {
-            int now = millis();
             Key k = keyMatrix[r][c];
 
-            if (now - k.updatetime < debounce) {
+            unsigned long duration = now >= k.updatetime
+                                         ? now - k.updatetime
+                                         : now + ULONG_MAX - k.updatetime;
+            if (duration < debounce) {
                 // pass
             } else if (CheckIsActive(c)) {
                 OnKeyActive(r, c, now);
@@ -64,16 +73,14 @@ void KeyPad::Scan() {
     isScanning = false;
 }
 
-void KeyPad::Send() {
+void keypad::KeyPad::Send() {
     SwitchControlLibrary().sendReport();
 }
 
-void KeyPad::PlayMacro() {
+void keypad::KeyPad::PlayMacro() {
     if (!curMacro.isPlaying || curMacro.index == MacroRecord::NO_MACRO) {
         return;
     }
-
-    Serial.println("+++ macro start +++");
 
     Record *r = macroList[curMacro.index];
     for (; r->type != Operation::END; ++r) {
@@ -82,18 +89,14 @@ void KeyPad::PlayMacro() {
             break;
         }
 
-        Serial.print("macro(");
-        Serial.print(r->type);
-        Serial.print(", ");
-        Serial.print(r->param);
-        Serial.println(")");
+        OperationLog("macro", r);
 
         switch (r->type) {
         case Operation::BTN:
-            PressKey(r->param);
+            SimPressKey(r->param);
             break;
         case Operation::HAT_BTN:
-            PressHat(r->param);
+            SimPressHat(r->param);
             break;
         case Operation::DELAY:
             delay(r->param);
@@ -102,14 +105,30 @@ void KeyPad::PlayMacro() {
     }
 
     if (r->type == Operation::END && r->param == 0) {
-        Serial.println("--- macro ends ---");
         curMacro.index = MacroRecord::NO_MACRO;
     }
 }
 
 // ----------------------------------------------------------------------------
 
-bool KeyPad::CheckIsActive(int c) {
+void keypad::KeyPad::OperationLog(const char *prefix, Record *re) {
+#ifdef DEBUG
+    Serial.print(prefix);
+    if (re != nullptr) {
+        Serial.print("(");
+        Serial.print(re->type);
+        Serial.print(", ");
+        Serial.print(re->param);
+        Serial.print(")");
+    }
+
+    Serial.print("\n");
+#endif
+}
+
+// ----------------------------------------------------------------------------
+
+bool keypad::KeyPad::CheckIsActive(int c) {
     int colPin = colPinList[c];
 
     bool isActive = digitalRead(colPin) == LOW;
@@ -117,7 +136,7 @@ bool KeyPad::CheckIsActive(int c) {
     return isActive;
 }
 
-bool KeyPad::CheckIsActive(int r, int c) {
+bool keypad::KeyPad::CheckIsActive(int r, int c) {
     int rowPin = rowPinList[r];
     int colPin = colPinList[c];
 
@@ -128,7 +147,7 @@ bool KeyPad::CheckIsActive(int r, int c) {
     return isActive;
 }
 
-void KeyPad::OnKeyActive(int r, int c, int now) {
+void keypad::KeyPad::OnKeyActive(int r, int c, unsigned long now) {
     Key &k = keyMatrix[r][c];
     switch (k.state) {
     case Key::State::TRIGGERED:
@@ -152,7 +171,7 @@ void KeyPad::OnKeyActive(int r, int c, int now) {
     }
 }
 
-void KeyPad::OnKeyInactive(int r, int c, int now) {
+void keypad::KeyPad::OnKeyInactive(int r, int c, unsigned long now) {
     Key &k = keyMatrix[r][c];
     switch (k.state) {
     case Key::State::TRIGGERED:
@@ -176,51 +195,77 @@ void KeyPad::OnKeyInactive(int r, int c, int now) {
 
 // ----------------------------------------------------------------------------
 
-void KeyPad::OnKeyPressed(int r, int c) {
-    Record &re = keyMap[curLayer][r * col + c];
-    Serial.print("(");
-    Serial.print(re.type);
-    Serial.print(", ");
-    Serial.print(re.param);
-    Serial.println(")");
+void keypad::KeyPad::OnKeyPressed(int r, int c) {
+    int layer = layeringState.GetCurLayer();
+    Record &re = keyMap[layer][r * col + c];
+
+    OperationLog("press", &re);
+
+    if (layeringState.IsInOneShotState()) {
+        layeringState.OneShotLayerOff();
+    }
 
     switch (re.type) {
+    case Operation::MACRO:
+        curMacro.isPlaying = false;
+        curMacro.index = curMacro.index == MacroRecord::NO_MACRO
+                             ? re.param
+                             : MacroRecord::NO_MACRO;
+        curMacro.row = r;
+        curMacro.col = c;
+        break;
+    case Operation::MOMENT_LAYER:
+        layeringState.ActivateLayer(re.param);
+        break;
+    case Operation::ONE_SHOT_LAYER:
+        layeringState.OneShotLayerOn(re.param);
+        break;
+    case Operation::TOGGLE_LAYER:
+        layeringState.ToggleLayer(re.param);
+        break;
+    case Operation::DEFAULT_LAYER:
+        layeringState.SetDefaultLayer(re.param);
+        break;
     case Operation::BTN:
         SwitchControlLibrary().pressButton(re.param);
         break;
     case Operation::HAT_BTN:
         SwitchControlLibrary().pressHatButton(re.param);
         break;
-    case Operation::MACRO:
-        curMacro.isPlaying = false;
-        curMacro.index = curMacro.index == MacroRecord::NO_MACRO ? re.param : MacroRecord::NO_MACRO;
-        curMacro.row = r;
-        curMacro.col = c;
+    default:
         break;
     }
 }
 
-void KeyPad::OnKeyHeld(int r, int c) {}
+void keypad::KeyPad::OnKeyHeld(int r, int c) {
+    int layer = layeringState.GetCurLayer();
+    Record &re = keyMap[layer][r * col + c];
+    OperationLog("hold", &re);
+}
 
-void KeyPad::OnKeyReleased(int r, int c) {
-    Record &re = keyMap[curLayer][r * col + c];
+void keypad::KeyPad::OnKeyReleased(int r, int c) {
+    int layer = layeringState.GetCurLayer();
+    Record &re = keyMap[layer][r * col + c];
 
     switch (re.type) {
+    case Operation::MACRO:
+        curMacro.isPlaying = true;
+        break;
+    case Operation::MOMENT_LAYER:
+        layeringState.DeactivateLayer(re.param);
+        break;
     case Operation::BTN:
         SwitchControlLibrary().releaseButton(re.param);
         break;
     case Operation::HAT_BTN:
         SwitchControlLibrary().releaseHatButton(re.param);
         break;
-    case Operation::MACRO:
-        curMacro.isPlaying = true;
-        break;
     }
 }
 
 // ----------------------------------------------------------------------------
 
-void KeyPad::PressKey(uint16_t button) {
+void keypad::KeyPad::SimPressKey(uint16_t button) {
     SwitchControlLibrary().pressButton(button);
     SwitchControlLibrary().sendReport();
     delay(clickDelay);
@@ -229,7 +274,7 @@ void KeyPad::PressKey(uint16_t button) {
     delay(keyEndDelay);
 }
 
-void KeyPad::PressHat(uint8_t button) {
+void keypad::KeyPad::SimPressHat(uint8_t button) {
     SwitchControlLibrary().pressHatButton(button);
     SwitchControlLibrary().sendReport();
     delay(clickDelay);

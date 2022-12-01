@@ -1,5 +1,6 @@
 #pragma once
 
+#include "LayeringState.h"
 #include <Arduino.h>
 #include <SwitchControlLibrary.h>
 
@@ -9,6 +10,12 @@ namespace keypad {
         DELAY,
         MACRO,
         END,
+        // --------------------------------------------------------------------
+        MOMENT_LAYER,
+        ONE_SHOT_LAYER,
+        TOGGLE_LAYER,
+        DEFAULT_LAYER,
+        // --------------------------------------------------------------------
         BTN,
         HAT,
         HAT_BTN
@@ -16,7 +23,7 @@ namespace keypad {
 
     struct Record {
         Operation type;
-        int param;
+        unsigned long param;
     };
 
     struct MacroRecord {
@@ -36,7 +43,7 @@ namespace keypad {
         };
 
         State state = State::RELEASED;
-        int updatetime = 0;
+        unsigned long updatetime = 0;
     };
 
     class KeyPad {
@@ -45,8 +52,8 @@ namespace keypad {
             int row, int col, int layer,
             int *rowPinList, int *colPinList,
             Record **keyMap, Record **macroList,
-            int debounce, int holdThreshold,
-            int clickDelay, int keyEndDelay
+            unsigned long debounce, unsigned long holdThreshold,
+            unsigned long clickDelay, unsigned long keyEndDelay
         );
         ~KeyPad();
         void Scan();
@@ -54,26 +61,32 @@ namespace keypad {
         void PlayMacro();
 
     private:
-        int row, col, layer;
+        int row, col;
+
         int *rowPinList, *colPinList;
         Record **keyMap, **macroList;
-        int debounce, holdThreshold, clickDelay, keyEndDelay;
+
+        unsigned long debounce, holdThreshold, clickDelay, keyEndDelay;
+
         Key **keyMatrix;
         bool isScanning = false;
-        int curLayer = 0;
+
+        LayeringState layeringState;
+
         MacroRecord curMacro;
+
+        void OperationLog(const char *prefix, Record *re = nullptr);
 
         bool CheckIsActive(int c);
         bool CheckIsActive(int r, int c);
-        void OnKeyActive(int r, int c, int now);
-        void OnKeyInactive(int r, int c, int now);
+        void OnKeyActive(int r, int c, unsigned long now);
+        void OnKeyInactive(int r, int c, unsigned long now);
 
         void OnKeyPressed(int r, int c);
         void OnKeyHeld(int r, int c);
         void OnKeyReleased(int r, int c);
 
-        void PressKey(uint16_t button);
-        void PressHat(uint8_t button);
+        void SimPressKey(uint16_t button);
+        void SimPressHat(uint8_t button);
     };
-
 }

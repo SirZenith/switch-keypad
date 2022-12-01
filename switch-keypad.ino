@@ -1,5 +1,5 @@
-#include "KeyPad.h"
-#include "config.h"
+#include "src/KeyPad.h"
+#include "config/config.h"
 
 using keypad::KeyPad;
 

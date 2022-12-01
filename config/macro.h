@@ -1,37 +1,15 @@
 #pragma once
 
-#include "KeyPad.h"
-#include "key_name_macro.h"
-#include <SwitchControlLibrary.h>
+#include "../src/KeyPad.h"
+#include "../src/key_name_macro.h"
 
 namespace config {
-    using keypad::Operation;
     using keypad::Record;
 
-    const int row = 2;
-    const int col = 3;
-    const int layer = 3;
-    int rowPinList[] = {1, 0};
-    int colPinList[] = {2, 3, 4};
-
-    Record *keyMap[6] = {
-        (Record[]){
-            // row 1
-            BTN_A, HAT_BTN_UP, MACRO(0),
-            // row 2
-            BTN_B, HAT_BTN_DOWN, MACRO(1),
-        },
-    };
-
-    const int DEBOUNCE = 1;
-    const int HOLD_THRESHOLD = 500;
-
-    const int CLICK_DELAY = 80;
-    const int KEY_END_DELAY = 80;
-    const int SMALL_DIALOG_DELAY = 250;
-    const int MEDIUM_DIALOG_DELAY = 500;
-    const int LARGE_DIALOG_DELAY = 800;
-    const int MENU_LOAD_DELAY = 2800;
+    const unsigned long SMALL_DIALOG_DELAY = 250;
+    const unsigned long MEDIUM_DIALOG_DELAY = 500;
+    const unsigned long LARGE_DIALOG_DELAY = 800;
+    const unsigned long MENU_LOAD_DELAY = 2800;
 
     Record *macroList[] = {
         (Record[]){
@@ -90,4 +68,4 @@ namespace config {
             BTN_B,
             END(false),
         }};
-};
+}
