@@ -231,6 +231,7 @@ void keypad::KeyPad::OnKeyPressed(int r, int c) {
         layeringState.ActivateLayer(re.param);
         break;
     case Operation::ONE_SHOT_LAYER:
+        key.layer = layer;
         layeringState.OneShotLayerOn(re.param);
         break;
     case Operation::TOGGLE_LAYER:
@@ -287,6 +288,9 @@ void keypad::KeyPad::OnKeyReleased(int r, int c) {
     case Operation::MOMENT_LAYER:
         key.layer = LayeringState::NO_LAYER;
         layeringState.DeactivateLayer(re.param);
+        break;
+    case Operation::ONE_SHOT_LAYER:
+        key.layer = LayeringState::NO_LAYER;
         break;
     case Operation::TOGGLE_LAYER:
         key.layer = LayeringState::NO_LAYER;
