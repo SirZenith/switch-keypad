@@ -17,5 +17,5 @@ namespace config {
     const unsigned long HOLD_THRESHOLD = 500UL * 1000UL;
 
     const unsigned long CLICK_DELAY = 80UL;
-    const unsigned long KEY_END_DELAY = 80UL;
+    const unsigned long KEY_END_DELAY = 100UL;
 }
