@@ -7,7 +7,7 @@ keypad::KeyPad::KeyPad(
     int *rowPinList, int *colPinList,
     Record **keyMap, Record **macroList,
     unsigned long debounce, unsigned long holdThreshold,
-    unsigned long clickDelay, unsigned long changeKeyDelay
+    unsigned long clickDelay, unsigned long keyEndDelay
 ) : row{row},
     col{col},
     // ------------------------------------------------------------------------
