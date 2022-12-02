@@ -141,7 +141,7 @@ void keypad::KeyPad::OperationLog(const char *msg, const Record *re) {
     Serial.print(msg);
     if (re != nullptr) {
         Serial.print("(");
-        Serial.print(re->type);
+        Serial.print(GetOperatioinName(re->type));
         Serial.print(", ");
         Serial.print(re->param);
         Serial.print(")");
@@ -246,7 +246,7 @@ void keypad::KeyPad::OnKeyPressed(int r, int c) {
 
     if (re.onHold == nullptr) {
         OperationLog("press", &re);
-        TapTheKey(key, re, r, c, layer);
+        DoKeyTap(key, re, r, c, layer);
     }
 }
 
@@ -260,7 +260,7 @@ void keypad::KeyPad::OnKeyHeld(int r, int c) {
     if (re.onHold != nullptr) {
         OperationLog("hold", re.onHold);
         key.isHoldTriggered = true;
-        TapTheKey(key, *re.onHold, r, c, layer);
+        DoKeyTap(key, *re.onHold, r, c, layer);
     }
 }
 
@@ -272,20 +272,20 @@ void keypad::KeyPad::OnKeyReleased(int r, int c) {
     const Record &re = keyMap[layer][r * col + c];
 
     if (re.onHold == nullptr) {
-        ReleaseTheKey(key, re, r, c, layer);
+        DoKeyRelease(key, re, r, c, layer);
     } else if (key.isHoldTriggered) {
         key.isHoldTriggered = false;
-        ReleaseTheKey(key, *re.onHold, r, c, layer);
+        DoKeyRelease(key, *re.onHold, r, c, layer);
     } else {
         OperationLog("press", &re);
-        TapTheKey(key, re, r, c, layer);
-        ReleaseTheKey(key, re, r, c, layer);
+        DoKeyTap(key, re, r, c, layer);
+        DoKeyRelease(key, re, r, c, layer);
     }
 }
 
 // ----------------------------------------------------------------------------
 
-void keypad::KeyPad::TapTheKey(Key &key, const Record &re, int r, int c, int layer) {
+void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int layer) {
     switch (re.type) {
     case EMPTY:
     case DELAY:
@@ -343,7 +343,7 @@ void keypad::KeyPad::TapTheKey(Key &key, const Record &re, int r, int c, int lay
     }
 }
 
-void keypad::KeyPad::ReleaseTheKey(Key &key, const Record &re, int r, int c, int layer) {
+void keypad::KeyPad::DoKeyRelease(Key &key, const Record &re, int r, int c, int layer) {
     switch (re.type) {
     case EMPTY:
     case DELAY:

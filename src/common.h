@@ -1,6 +1,11 @@
 #pragma once
 
 namespace keypad {
+    enum DelayType {
+        CLICK_DELAY = -1,
+        KEY_END_DELAY = -2
+    };
+
     enum Operation {
         EMPTY,
         DELAY,
@@ -18,6 +23,8 @@ namespace keypad {
         L_STICK,
         R_STICK
     };
+
+    const char *GetOperatioinName(Operation type);
 
     struct Record {
         Operation type;

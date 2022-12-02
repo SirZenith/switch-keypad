@@ -52,8 +52,8 @@ namespace keypad {
         void OnKeyHeld(int r, int c);
         void OnKeyReleased(int r, int c);
 
-        void TapTheKey(Key &key, const Record &re, int r, int c, int layer);
-        void ReleaseTheKey(Key &key, const Record &re, int r, int c, int layer);
+        void DoKeyTap(Key &key, const Record &re, int r, int c, int layer);
+        void DoKeyRelease(Key &key, const Record &re, int r, int c, int layer);
 
         void SimPressKey(uint16_t button);
         void SimPressHat(uint8_t button);
