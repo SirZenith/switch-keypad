@@ -4,6 +4,10 @@
 #include <SwitchControlLibrary.h>
 
 using keypad::Operation;
+using keypad::Record;
+
+#define HOLD(tap, hold) \
+    { tap, hold }
 
 #define EMPTY \
     { Operation::EMPTY, 0 }
@@ -56,6 +60,8 @@ using keypad::Operation;
 #define BTN_PLUS \
     { Operation::BTN, Button::PLUS }
 
+#define HAT_NEUTRAL \
+    { Operation::Hat, Hat::NEUTRAL }
 #define HAT_UP \
     { Operation::HAT, Hat::UP }
 #define HAT_DOWN \

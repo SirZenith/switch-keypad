@@ -11,61 +11,66 @@ namespace config {
     const unsigned long LARGE_DIALOG_DELAY = 800;
     const unsigned long MENU_LOAD_DELAY = 2800;
 
-    Record *macroList[] = {
-        (Record[]){
-            BTN_A,
-            DELAY(SMALL_DIALOG_DELAY),
+    const Record macroItemCopy[] = {
+        BTN_A,
+        DELAY(SMALL_DIALOG_DELAY),
 
-            HAT_BTN_DOWN,
-            HAT_BTN_DOWN,
-            HAT_BTN_DOWN,
-            HAT_BTN_DOWN,
-            HAT_BTN_DOWN,
-            BTN_A,
-            DELAY(LARGE_DIALOG_DELAY),
+        HAT_BTN_DOWN,
+        HAT_BTN_DOWN,
+        HAT_BTN_DOWN,
+        HAT_BTN_DOWN,
+        HAT_BTN_DOWN,
+        BTN_A,
+        DELAY(LARGE_DIALOG_DELAY),
 
-            BTN_A,
-            BTN_A,
-            DELAY(MENU_LOAD_DELAY),
+        BTN_A,
+        BTN_A,
+        DELAY(MENU_LOAD_DELAY),
 
-            BTN_A,
-            HAT_BTN_UP,
-            HAT_BTN_RIGHT,
-            HAT_BTN_DOWN,
-            HAT_BTN_DOWN,
-            BTN_A,
+        BTN_A,
+        HAT_BTN_UP,
+        HAT_BTN_RIGHT,
+        HAT_BTN_DOWN,
+        HAT_BTN_DOWN,
+        BTN_A,
 
-            DELAY(MENU_LOAD_DELAY),
+        DELAY(MENU_LOAD_DELAY),
 
-            BTN_X,
-            BTN_X,
-            BTN_L,
+        BTN_X,
+        BTN_X,
+        BTN_L,
 
-            BTN_A,
+        BTN_A,
 
-            DELAY(SMALL_DIALOG_DELAY),
+        DELAY(SMALL_DIALOG_DELAY),
 
-            HAT_BTN_DOWN,
-            HAT_BTN_DOWN,
-            HAT_BTN_DOWN,
-            BTN_A,
+        HAT_BTN_DOWN,
+        HAT_BTN_DOWN,
+        HAT_BTN_DOWN,
+        BTN_A,
 
-            DELAY(MEDIUM_DIALOG_DELAY),
+        DELAY(MEDIUM_DIALOG_DELAY),
 
-            BTN_B,
+        BTN_B,
 
-            DELAY(MENU_LOAD_DELAY),
+        DELAY(MENU_LOAD_DELAY),
 
-            HAT_BTN_UP,
-            HAT_BTN_LEFT,
-            HAT_BTN_UP,
-            HAT_BTN_UP,
+        HAT_BTN_UP,
+        HAT_BTN_LEFT,
+        HAT_BTN_UP,
+        HAT_BTN_UP,
 
-            END(true),
-        },
-        (Record[]){
-            BTN_A,
-            BTN_B,
-            END(false),
-        }};
+        END(true),
+    };
+
+    const Record macroSendToBoxBugTrigger[] = {
+        BTN_A,
+        BTN_B,
+        END(false),
+    };
+
+    const Record *macroList[] = {
+        macroItemCopy,
+        macroSendToBoxBugTrigger,
+    };
 }

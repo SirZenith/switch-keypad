@@ -84,7 +84,7 @@ void keypad::LayeringState::OneShotLayerOff() {
 
 void keypad::LayeringState::OperationLog(const char *msg, unsigned long param) {
 #ifdef DEBUG
-    Serial.print("layering: ");
+    Serial.print("[layering]: ");
     Serial.print(msg);
     if (param != NO_LAYER) {
         Serial.print("(");

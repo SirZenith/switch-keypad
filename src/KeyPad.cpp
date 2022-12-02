@@ -2,10 +2,32 @@
 
 // ----------------------------------------------------------------------------
 
+keypad::Record::Record(Operation op, unsigned long param)
+    : type{op},
+      param{param},
+      onHold{nullptr} {}
+
+keypad::Record::Record(Record onTap, Record onHold)
+    : type{onTap.type},
+      param{onTap.param},
+      onHold{new Record(onHold.type, onHold.param)} {}
+
+keypad::Record::~Record() {
+    if (onHold != nullptr) {
+        delete onHold;
+    }
+}
+
+void keypad::Record::SetOnHold(Record r) {
+    onHold = new Record(r.type, r.param);
+}
+
+// ----------------------------------------------------------------------------
+
 keypad::KeyPad::KeyPad(
     int row, int col, int layer,
     int *rowPinList, int *colPinList,
-    Record **keyMap, Record **macroList,
+    const Record **keyMap, const Record **macroList,
     unsigned long debounce, unsigned long holdThreshold,
     unsigned long clickDelay, unsigned long keyEndDelay
 ) : row{row},
@@ -23,7 +45,12 @@ keypad::KeyPad::KeyPad(
 
     keyMatrix = new Key *[row];
     for (int r = 0; r < row; ++r) {
-        keyMatrix[r] = new Key[col];
+        Key *keyRow = new Key[col];
+        keyMatrix[r] = keyRow;
+
+        for (int c = 0; c < col; ++c) {
+            keyRow[c].layer = LayeringState::NO_LAYER;
+        }
     }
 
     layeringState = LayeringState();
@@ -75,10 +102,12 @@ void keypad::KeyPad::PlayMacro() {
     }
 
     digitalWrite(LED_BUILTIN, HIGH);
+    OperationLog("[macro]: start");
 
-    Record *r = macroList[curMacro.index];
+    const Record *r = macroList[curMacro.index];
     for (; r->type != Operation::END; ++r) {
         if (CheckIsActive(curMacro.row, curMacro.col)) {
+            OperationLog("[macro]: end");
             OnKeyActive(curMacro.row, curMacro.col, millis());
             break;
         }
@@ -107,7 +136,7 @@ void keypad::KeyPad::PlayMacro() {
 
 // ----------------------------------------------------------------------------
 
-void keypad::KeyPad::OperationLog(const char *msg, Record *re) {
+void keypad::KeyPad::OperationLog(const char *msg, const Record *re) {
 #ifdef DEBUG
     Serial.print(msg);
     if (re != nullptr) {
@@ -209,15 +238,59 @@ void keypad::KeyPad::OnKeyPressed(int r, int c) {
     int layer = key.layer != LayeringState::NO_LAYER
                     ? key.layer
                     : layeringState.GetCurLayer();
-    Record &re = keyMap[layer][r * col + c];
-
-    OperationLog("press", &re);
+    const Record &re = keyMap[layer][r * col + c];
 
     if (layeringState.IsInOneShotState()) {
         layeringState.OneShotLayerOff();
     }
 
+    if (re.onHold == nullptr) {
+        OperationLog("press", &re);
+        TapTheKey(key, re, r, c, layer);
+    }
+}
+
+void keypad::KeyPad::OnKeyHeld(int r, int c) {
+    Key &key = keyMatrix[r][c];
+    int layer = key.layer != LayeringState::NO_LAYER
+                    ? key.layer
+                    : layeringState.GetCurLayer();
+    const Record &re = keyMap[layer][r * col + c];
+
+    if (re.onHold != nullptr) {
+        OperationLog("hold", re.onHold);
+        key.isHoldTriggered = true;
+        TapTheKey(key, *re.onHold, r, c, layer);
+    }
+}
+
+void keypad::KeyPad::OnKeyReleased(int r, int c) {
+    Key &key = keyMatrix[r][c];
+    int layer = key.layer != LayeringState::NO_LAYER
+                    ? key.layer
+                    : layeringState.GetCurLayer();
+    const Record &re = keyMap[layer][r * col + c];
+
+    if (re.onHold == nullptr) {
+        ReleaseTheKey(key, re, r, c, layer);
+    } else if (key.isHoldTriggered) {
+        key.isHoldTriggered = false;
+        ReleaseTheKey(key, *re.onHold, r, c, layer);
+    } else {
+        OperationLog("press", &re);
+        TapTheKey(key, re, r, c, layer);
+        ReleaseTheKey(key, re, r, c, layer);
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+void keypad::KeyPad::TapTheKey(Key &key, const Record &re, int r, int c, int layer) {
     switch (re.type) {
+    case EMPTY:
+    case DELAY:
+    case END:
+        break;
     case Operation::MACRO:
         curMacro.isPlaying = false;
         curMacro.index = curMacro.index == MacroRecord::NO_MACRO
@@ -226,6 +299,7 @@ void keypad::KeyPad::OnKeyPressed(int r, int c) {
         curMacro.row = r;
         curMacro.col = c;
         break;
+    // ------------------------------------------------------------------------
     case Operation::MOMENT_LAYER:
         key.layer = layer;
         layeringState.ActivateLayer(re.param);
@@ -241,8 +315,12 @@ void keypad::KeyPad::OnKeyPressed(int r, int c) {
     case Operation::DEFAULT_LAYER:
         layeringState.SetDefaultLayer(re.param);
         break;
+    // ------------------------------------------------------------------------
     case Operation::BTN:
         SwitchControlLibrary().pressButton(re.param);
+        break;
+    case Operation::HAT:
+        SwitchControlLibrary().moveHat(re.param);
         break;
     case Operation::HAT_BTN:
         SwitchControlLibrary().pressHatButton(re.param);
@@ -259,32 +337,22 @@ void keypad::KeyPad::OnKeyPressed(int r, int c) {
             re.param & UINT8_MAX
         );
         break;
+    // ------------------------------------------------------------------------
     default:
         break;
     }
 }
 
-void keypad::KeyPad::OnKeyHeld(int r, int c) {
-    Key &key = keyMatrix[r][c];
-    int layer = key.layer != LayeringState::NO_LAYER
-                    ? key.layer
-                    : layeringState.GetCurLayer();
-    Record &re = keyMap[layer][r * col + c];
-
-    OperationLog("hold", &re);
-}
-
-void keypad::KeyPad::OnKeyReleased(int r, int c) {
-    Key &key = keyMatrix[r][c];
-    int layer = key.layer != LayeringState::NO_LAYER
-                    ? key.layer
-                    : layeringState.GetCurLayer();
-    Record &re = keyMap[layer][r * col + c];
-
+void keypad::KeyPad::ReleaseTheKey(Key &key, const Record &re, int r, int c, int layer) {
     switch (re.type) {
+    case EMPTY:
+    case DELAY:
+    case END:
+        break;
     case Operation::MACRO:
         curMacro.isPlaying = true;
         break;
+    // ------------------------------------------------------------------------
     case Operation::MOMENT_LAYER:
         key.layer = LayeringState::NO_LAYER;
         layeringState.DeactivateLayer(re.param);
@@ -295,8 +363,14 @@ void keypad::KeyPad::OnKeyReleased(int r, int c) {
     case Operation::TOGGLE_LAYER:
         key.layer = LayeringState::NO_LAYER;
         break;
+    case Operation::DEFAULT_LAYER:
+        break;
+    // ------------------------------------------------------------------------
     case Operation::BTN:
         SwitchControlLibrary().releaseButton(re.param);
+        break;
+    case Operation::HAT:
+        SwitchControlLibrary().moveHat(Hat::NEUTRAL);
         break;
     case Operation::HAT_BTN:
         SwitchControlLibrary().releaseHatButton(re.param);
@@ -305,6 +379,7 @@ void keypad::KeyPad::OnKeyReleased(int r, int c) {
         SwitchControlLibrary().moveLeftStick(Stick::NEUTRAL, Stick::NEUTRAL);
     case Operation::R_STICK:
         SwitchControlLibrary().moveRightStick(Stick::NEUTRAL, Stick::NEUTRAL);
+    // ------------------------------------------------------------------------
     default:
         break;
     }
