@@ -1,27 +1,28 @@
 #pragma once
 
 namespace keypad {
-    enum DelayType {
-        CLICK_DELAY = -1,
-        KEY_END_DELAY = -2
-    };
-
-    enum Operation {
+    enum class Operation {
         EMPTY,
-        DELAY,
-        END,
-        MACRO,
         // --------------------------------------------------------------------
+        // delay
+        DELAY,
+        CLICK_DELAY,
+        CLICK_END_DELAY,
+        // --------------------------------------------------------------------
+        // macro releated
+        MACRO,
+        END,
+        // --------------------------------------------------------------------
+        // layering
         MOMENT_LAYER,
         ONE_SHOT_LAYER,
         TOGGLE_LAYER,
         DEFAULT_LAYER,
         // --------------------------------------------------------------------
-        BTN,
-        HAT,
-        HAT_BTN,
-        L_STICK,
-        R_STICK
+        // button operation
+        PRESS,
+        RELEASE,
+        CLICK
     };
 
     const char *GetOperatioinName(Operation type);

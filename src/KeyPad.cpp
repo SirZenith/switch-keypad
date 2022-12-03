@@ -2,6 +2,12 @@
 
 // ----------------------------------------------------------------------------
 
+bool keypad::MacroRecord::CheckIsMacroPlaying() {
+    return isPlaying && index != MacroRecord::NO_MACRO;
+}
+
+// ----------------------------------------------------------------------------
+
 keypad::Record::Record(Operation op, unsigned long param)
     : type{op},
       param{param},
@@ -29,7 +35,7 @@ keypad::KeyPad::KeyPad(
     int *rowPinList, int *colPinList,
     const Record **keyMap, const Record **macroList,
     unsigned long debounce, unsigned long holdThreshold,
-    unsigned long clickDelay, unsigned long keyEndDelay
+    unsigned long clickDelay, unsigned long clickEndDelay
 ) : row{row},
     col{col},
     // ------------------------------------------------------------------------
@@ -41,7 +47,7 @@ keypad::KeyPad::KeyPad(
     debounce{debounce},
     holdThreshold{holdThreshold},
     clickDelay{clickDelay},
-    keyEndDelay{keyEndDelay} {
+    clickEndDelay{clickEndDelay} {
 
     keyMatrix = new Key *[row];
     for (int r = 0; r < row; ++r) {
@@ -69,7 +75,7 @@ keypad::KeyPad::~KeyPad() {
 // ----------------------------------------------------------------------------
 
 void keypad::KeyPad::Scan() {
-    if (CheckIsMacroPlaying()) {
+    if (curMacro.CheckIsMacroPlaying()) {
         return;
     }
 
@@ -93,41 +99,63 @@ void keypad::KeyPad::Scan() {
 }
 
 void keypad::KeyPad::Send() {
-    SwitchControlLibrary().sendReport();
+    if (isDirty) {
+        SwitchController().SendReport();
+        isDirty = false;
+    }
 }
 
 void keypad::KeyPad::PlayMacro() {
-    if (!CheckIsMacroPlaying()) {
+    if (!curMacro.CheckIsMacroPlaying()) {
         return;
     }
 
     digitalWrite(LED_BUILTIN, HIGH);
     OperationLog("[macro]: start");
 
-    const Record *r = macroList[curMacro.index];
-    for (; r->type != Operation::END; ++r) {
+    const Record *re = macroList[curMacro.index];
+    for (; re->type != Operation::END; ++re) {
         if (CheckIsActive(curMacro.row, curMacro.col)) {
             OperationLog("[macro]: end");
             OnKeyActive(curMacro.row, curMacro.col, millis());
             break;
         }
 
-        OperationLog("macro", r);
+        OperationLog(nullptr, re);
 
-        switch (r->type) {
-        case Operation::BTN:
-            SimPressKey(r->param);
-            break;
-        case Operation::HAT_BTN:
-            SimPressHat(r->param);
-            break;
+        switch (re->type) {
         case Operation::DELAY:
-            delay(r->param);
+            delay(re->param);
+            break;
+        case Operation::CLICK_DELAY:
+            delay(clickDelay);
+            break;
+        case Operation::CLICK_END_DELAY:
+            delay(clickEndDelay);
+            break;
+        // --------------------------------------------------------------------
+        case Operation::PRESS:
+            SwitchController().Press(re->param);
+            SwitchController().SendReport();
+            break;
+        case Operation::RELEASE:
+            SwitchController().Release(re->param);
+            SwitchController().SendReport();
+            break;
+        case Operation::CLICK:
+            SwitchController().Press(re->param);
+            SwitchController().SendReport();
+            delay(clickDelay);
+            SwitchController().Release(re->param);
+            SwitchController().SendReport();
+            delay(clickEndDelay);
+
+        default:
             break;
         }
     }
 
-    if (r->type == Operation::END && r->param == 0) {
+    if (re->type == Operation::END && re->param == 0) {
         curMacro.index = MacroRecord::NO_MACRO;
     }
 
@@ -137,32 +165,46 @@ void keypad::KeyPad::PlayMacro() {
 // ----------------------------------------------------------------------------
 
 void keypad::KeyPad::OperationLog(const char *msg, const Record *re) {
-#ifdef DEBUG
     Serial.print(msg);
+
     if (re != nullptr) {
+        const char *name = nullptr;
+        unsigned long value = 0;
+
+        switch (re->type) {
+        case Operation::PRESS:
+        case Operation::RELEASE:
+        case Operation::CLICK:
+            using switch_controller::KeyCode;
+
+            name = switch_controller::GetNameOfKeyCode((KeyCode)re->param);
+            value = switch_controller::GetValueInKeyCode((KeyCode)re->param);
+            break;
+
+        default:
+            name = GetOperatioinName(re->type);
+            value = re->param;
+            break;
+        }
+        Serial.print(name);
         Serial.print("(");
-        Serial.print(GetOperatioinName(re->type));
-        Serial.print(", ");
-        Serial.print(re->param);
+        Serial.print(value);
         Serial.print(")");
     }
 
     Serial.print("\n");
+#ifdef DEBUG
 #endif
 }
 
 // ----------------------------------------------------------------------------
-
-bool keypad::KeyPad::CheckIsMacroPlaying() {
-    return curMacro.isPlaying && curMacro.index != MacroRecord::NO_MACRO;
-}
 
 bool keypad::KeyPad::DebounceCheck(int r, int c, unsigned long now) {
     Key &k = keyMatrix[r][c];
 
     unsigned long duration = now >= k.updatetime
                                  ? now - k.updatetime
-                                 : now + ULONG_MAX - k.updatetime;
+                                 : ULONG_MAX - k.updatetime + now;
     return duration >= debounce;
 }
 
@@ -211,6 +253,10 @@ void keypad::KeyPad::OnKeyActive(int r, int c, unsigned long now) {
 
 void keypad::KeyPad::OnKeyInactive(int r, int c, unsigned long now) {
     Key &k = keyMatrix[r][c];
+
+    if (r == 1 && c == 2) {
+        Serial.println(k.state);
+    }
     switch (k.state) {
     case Key::State::TRIGGERED:
         k.state = Key::State::RELEASED;
@@ -245,7 +291,7 @@ void keypad::KeyPad::OnKeyPressed(int r, int c) {
     }
 
     if (re.onHold == nullptr) {
-        OperationLog("press", &re);
+        OperationLog("press: ", &re);
         DoKeyTap(key, re, r, c, layer);
     }
 }
@@ -258,7 +304,7 @@ void keypad::KeyPad::OnKeyHeld(int r, int c) {
     const Record &re = keyMap[layer][r * col + c];
 
     if (re.onHold != nullptr) {
-        OperationLog("hold", re.onHold);
+        OperationLog("hold: ", re.onHold);
         key.isHoldTriggered = true;
         DoKeyTap(key, *re.onHold, r, c, layer);
     }
@@ -277,7 +323,7 @@ void keypad::KeyPad::OnKeyReleased(int r, int c) {
         key.isHoldTriggered = false;
         DoKeyRelease(key, *re.onHold, r, c, layer);
     } else {
-        OperationLog("press", &re);
+        OperationLog("trigger: ", &re);
         DoKeyTap(key, re, r, c, layer);
         DoKeyRelease(key, re, r, c, layer);
     }
@@ -286,11 +332,9 @@ void keypad::KeyPad::OnKeyReleased(int r, int c) {
 // ----------------------------------------------------------------------------
 
 void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int layer) {
+    isDirty = true;
+
     switch (re.type) {
-    case EMPTY:
-    case DELAY:
-    case END:
-        break;
     case Operation::MACRO:
         curMacro.isPlaying = false;
         curMacro.index = curMacro.index == MacroRecord::NO_MACRO
@@ -316,39 +360,23 @@ void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int laye
         layeringState.SetDefaultLayer(re.param);
         break;
     // ------------------------------------------------------------------------
-    case Operation::BTN:
-        SwitchControlLibrary().pressButton(re.param);
+    case Operation::PRESS:
+        SwitchController().Press(re.param);
         break;
-    case Operation::HAT:
-        SwitchControlLibrary().moveHat(re.param);
-        break;
-    case Operation::HAT_BTN:
-        SwitchControlLibrary().pressHatButton(re.param);
-        break;
-    case Operation::L_STICK:
-        SwitchControlLibrary().moveLeftStick(
-            (re.param >> sizeof(uint8_t)) & UINT8_MAX,
-            re.param & UINT8_MAX
-        );
-        break;
-    case Operation::R_STICK:
-        SwitchControlLibrary().moveRightStick(
-            (re.param >> sizeof(uint8_t)) & UINT8_MAX,
-            re.param & UINT8_MAX
-        );
+    case Operation::RELEASE:
+        SwitchController().Release(re.param);
         break;
     // ------------------------------------------------------------------------
     default:
+        isDirty = false;
         break;
     }
 }
 
 void keypad::KeyPad::DoKeyRelease(Key &key, const Record &re, int r, int c, int layer) {
+    isDirty = true;
+
     switch (re.type) {
-    case EMPTY:
-    case DELAY:
-    case END:
-        break;
     case Operation::MACRO:
         curMacro.isPlaying = true;
         break;
@@ -366,41 +394,12 @@ void keypad::KeyPad::DoKeyRelease(Key &key, const Record &re, int r, int c, int 
     case Operation::DEFAULT_LAYER:
         break;
     // ------------------------------------------------------------------------
-    case Operation::BTN:
-        SwitchControlLibrary().releaseButton(re.param);
+    case Operation::PRESS:
+        SwitchController().Release(re.param);
         break;
-    case Operation::HAT:
-        SwitchControlLibrary().moveHat(Hat::NEUTRAL);
-        break;
-    case Operation::HAT_BTN:
-        SwitchControlLibrary().releaseHatButton(re.param);
-        break;
-    case Operation::L_STICK:
-        SwitchControlLibrary().moveLeftStick(Stick::NEUTRAL, Stick::NEUTRAL);
-    case Operation::R_STICK:
-        SwitchControlLibrary().moveRightStick(Stick::NEUTRAL, Stick::NEUTRAL);
     // ------------------------------------------------------------------------
     default:
+        isDirty = false;
         break;
     }
-}
-
-// ----------------------------------------------------------------------------
-
-void keypad::KeyPad::SimPressKey(uint16_t button) {
-    SwitchControlLibrary().pressButton(button);
-    SwitchControlLibrary().sendReport();
-    delay(clickDelay);
-    SwitchControlLibrary().releaseButton(button);
-    SwitchControlLibrary().sendReport();
-    delay(keyEndDelay);
-}
-
-void keypad::KeyPad::SimPressHat(uint8_t button) {
-    SwitchControlLibrary().pressHatButton(button);
-    SwitchControlLibrary().sendReport();
-    delay(clickDelay);
-    SwitchControlLibrary().releaseHatButton(button);
-    SwitchControlLibrary().sendReport();
-    delay(keyEndDelay);
 }

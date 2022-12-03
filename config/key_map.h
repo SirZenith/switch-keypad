@@ -7,17 +7,17 @@ namespace config {
     using keypad::Record;
 
     const Record layer1[] = {
-        ML(2), HAT_BTN_UP, ML(1),
-        HAT_BTN_LEFT, HAT_BTN_DOWN, HAT_BTN_RIGHT,
+        ML(2), PR_HAT_BTN_UP, ML(1),
+        PR_HAT_BTN_LEFT, PR_HAT_BTN_DOWN, PR_HAT_BTN_RIGHT,
     };
 
     const Record layer2[] = {
-        BTN_X, BTN_A, EMPTY,
-        BTN_Y, BTN_B, HOLD(BTN_L, BTN_R),
+        PR_BTN_X, PR_BTN_A, EMPTY,
+        PR_BTN_Y, PR_BTN_B, HOLD(PR_BTN_L, PR_BTN_R),
     };
     const Record layer3[] = {
         EMPTY, MACRO(0), MACRO(1),
-        EMPTY, BTN_L, BTN_R,
+        EMPTY, PR_BTN_L, PR_BTN_R,
     };
 
     const Record *keyMap[] = {

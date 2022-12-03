@@ -4,46 +4,48 @@ const char *keypad::GetOperatioinName(Operation type) {
     const char *name = nullptr;
 
     switch (type) {
-    case EMPTY:
+    case Operation::EMPTY:
         name = "empty";
         break;
-    case DELAY:
+    // ----------------------------------------------------------------------------
+    case Operation::DELAY:
         name = "delay";
         break;
-    case END:
-        name = "end";
+    case Operation::CLICK_DELAY:
+        name = "click-delay";
         break;
-    case MACRO:
+    case Operation::CLICK_END_DELAY:
+        name = "click-end-delay";
+        break;
+    // ----------------------------------------------------------------------------
+    case Operation::MACRO:
         name = "macro";
         break;
-    
-    case MOMENT_LAYER:
+    case Operation::END:
+        name = "end";
+        break;
+    // ----------------------------------------------------------------------------
+    case Operation::MOMENT_LAYER:
         name = "goto-layer";
         break;
-    case ONE_SHOT_LAYER:
+    case Operation::ONE_SHOT_LAYER:
         name = "one-shot-layer";
         break;
-    case TOGGLE_LAYER:
+    case Operation::TOGGLE_LAYER:
         name = "toggle-layer";
         break;
-    case DEFAULT_LAYER:
+    case Operation::DEFAULT_LAYER:
         name = "default-layer";
         break;
-    
-    case BTN:
-        name = "btn";
+    // ---------------------------------------------------------------------------- 
+    case Operation::PRESS:
+        name = "press";
         break;
-    case HAT:
-        name = "hat";
+    case Operation::RELEASE:
+        name = "release";
         break;
-    case HAT_BTN:
-        name = "hat-btn";
-        break;
-    case L_STICK:
-        name = "stick-L";
-        break;
-    case R_STICK:
-        name = "stick-R";
+    case Operation::CLICK:
+        name = "click";
         break;
 
     default:
