@@ -1,19 +1,23 @@
 #pragma once
 
 #include "LayeringState.h"
+#include "MacroRecorder.h"
 #include "common.h"
 #include <Arduino.h>
 #include <SwitchControlLibrary.h>
 
 namespace keypad {
     struct MacroRecord {
-        static const int NO_MACRO = -1;
-
         bool isPlaying = false;
-        int index = NO_MACRO;
+        const Record *macro = nullptr;
         int row, col;
 
+        bool CheckHasMacroBinded();
         bool CheckIsMacroPlaying();
+        
+        void ToggleMacro(const Record *macro, int r, int c);
+        void UpdateMacroBinding(const Record **macroList, int index, int r, int c);
+        void Unbind();
     };
     class KeyPad {
     public:
@@ -40,6 +44,7 @@ namespace keypad {
         LayeringState layeringState;
 
         MacroRecord curMacro;
+        MacroRecorder recorder;
 
         bool isDirty = false;
 

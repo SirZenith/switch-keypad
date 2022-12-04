@@ -2,30 +2,28 @@
 
 // ----------------------------------------------------------------------------
 
+bool keypad::MacroRecord::CheckHasMacroBinded() {
+    return macro != nullptr;
+}
+
 bool keypad::MacroRecord::CheckIsMacroPlaying() {
-    return isPlaying && index != MacroRecord::NO_MACRO;
+    return isPlaying && CheckHasMacroBinded();
 }
 
-// ----------------------------------------------------------------------------
-
-keypad::Record::Record(Operation op, unsigned long param)
-    : type{op},
-      param{param},
-      onHold{nullptr} {}
-
-keypad::Record::Record(Record onTap, Record onHold)
-    : type{onTap.type},
-      param{onTap.param},
-      onHold{new Record(onHold.type, onHold.param)} {}
-
-keypad::Record::~Record() {
-    if (onHold != nullptr) {
-        delete onHold;
-    }
+void keypad::MacroRecord::ToggleMacro(const Record *macro, int r, int c) {
+    row = r;
+    col = c;
+    macro = CheckHasMacroBinded() ? macro : nullptr;
 }
 
-void keypad::Record::SetOnHold(Record r) {
-    onHold = new Record(r.type, r.param);
+void keypad::MacroRecord::UpdateMacroBinding(const Record **macroList, int index, int r, int c) {
+    row = r;
+    col = c;
+    macro = CheckHasMacroBinded() ? macroList[index] : nullptr;
+}
+
+void keypad::MacroRecord::Unbind() {
+    macro = nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -113,7 +111,7 @@ void keypad::KeyPad::PlayMacro() {
     digitalWrite(LED_BUILTIN, HIGH);
     OperationLog("[macro]: start");
 
-    const Record *re = macroList[curMacro.index];
+    const Record *re = curMacro.macro;
     for (; re->type != Operation::END; ++re) {
         if (CheckIsActive(curMacro.row, curMacro.col)) {
             OperationLog("[macro]: end");
@@ -156,7 +154,7 @@ void keypad::KeyPad::PlayMacro() {
     }
 
     if (re->type == Operation::END && re->param == 0) {
-        curMacro.index = MacroRecord::NO_MACRO;
+        curMacro.Unbind();
     }
 
     digitalWrite(LED_BUILTIN, LOW);
@@ -254,9 +252,6 @@ void keypad::KeyPad::OnKeyActive(int r, int c, unsigned long now) {
 void keypad::KeyPad::OnKeyInactive(int r, int c, unsigned long now) {
     Key &k = keyMatrix[r][c];
 
-    if (r == 1 && c == 2) {
-        Serial.println(k.state);
-    }
     switch (k.state) {
     case Key::State::TRIGGERED:
         k.state = Key::State::RELEASED;
@@ -337,11 +332,17 @@ void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int laye
     switch (re.type) {
     case Operation::MACRO:
         curMacro.isPlaying = false;
-        curMacro.index = curMacro.index == MacroRecord::NO_MACRO
-                             ? re.param
-                             : MacroRecord::NO_MACRO;
-        curMacro.row = r;
-        curMacro.col = c;
+        curMacro.UpdateMacroBinding(macroList, re.param, r, c);
+        break;
+    case Operation::MACRO_RECORD:
+        recorder.ToggleRecording(false);
+        break;
+    case Operation::MACRO_RECORD_LOOP:
+        recorder.ToggleRecording(true);
+        break;
+    case Operation::MACRO_PLAY_RECORDED:
+        curMacro.isPlaying = false;
+        curMacro.ToggleMacro(recorder.GetMacro(), r, c);
         break;
     // ------------------------------------------------------------------------
     case Operation::MOMENT_LAYER:
@@ -362,9 +363,11 @@ void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int laye
     // ------------------------------------------------------------------------
     case Operation::PRESS:
         SwitchController().Press(re.param);
+        recorder.TryRecord(re);
         break;
     case Operation::RELEASE:
         SwitchController().Release(re.param);
+        recorder.TryRecord(re);
         break;
     // ------------------------------------------------------------------------
     default:
@@ -378,6 +381,7 @@ void keypad::KeyPad::DoKeyRelease(Key &key, const Record &re, int r, int c, int 
 
     switch (re.type) {
     case Operation::MACRO:
+    case Operation::MACRO_PLAY_RECORDED:
         curMacro.isPlaying = true;
         break;
     // ------------------------------------------------------------------------
@@ -396,6 +400,7 @@ void keypad::KeyPad::DoKeyRelease(Key &key, const Record &re, int r, int c, int 
     // ------------------------------------------------------------------------
     case Operation::PRESS:
         SwitchController().Release(re.param);
+        recorder.TryRecord(Record(Operation::RELEASE, re.param));
         break;
     // ------------------------------------------------------------------------
     default:

@@ -11,6 +11,9 @@ namespace keypad {
         // --------------------------------------------------------------------
         // macro releated
         MACRO,
+        MACRO_RECORD,
+        MACRO_RECORD_LOOP,
+        MACRO_PLAY_RECORDED,
         END,
         // --------------------------------------------------------------------
         // layering
@@ -32,6 +35,7 @@ namespace keypad {
         unsigned long param;
         Record *onHold = nullptr;
 
+        Record();
         Record(Operation op, unsigned long param);
         Record(Record onTap, Record onHold);
         ~Record();

@@ -55,3 +55,28 @@ const char *keypad::GetOperatioinName(Operation type) {
 
     return name;
 }
+
+// ----------------------------------------------------------------------------
+
+keypad::Record::Record() = default;
+
+keypad::Record::Record(Operation op, unsigned long param)
+    : type{op},
+      param{param},
+      onHold{nullptr} {}
+
+keypad::Record::Record(Record onTap, Record onHold)
+    : type{onTap.type},
+      param{onTap.param},
+      onHold{new Record(onHold.type, onHold.param)} {}
+
+keypad::Record::~Record() {
+    if (onHold != nullptr) {
+        delete onHold;
+    }
+}
+
+void keypad::Record::SetOnHold(Record r) {
+    onHold = new Record(r.type, r.param);
+}
+

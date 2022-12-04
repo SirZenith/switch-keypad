@@ -27,6 +27,12 @@ using switch_controller::Stick;
 
 #define MACRO(index) \
     { Operation::MACRO, index }
+#define MACRO_RECORD \
+    { Operation::MACRO_RECORD, 0 }
+#define MACRO_RECORD_LOOP \
+    { Operation::MACRO_RECORD_LOOP, 0 }
+#define MACRO_PLAY_RECORDED \
+    { Operation::MACRO_PLAY_RECORDED, 0 }
 #define END(isRepeat) \
     { Operation::END, isRepeat }
 
