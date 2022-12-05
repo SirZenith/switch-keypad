@@ -16,12 +16,12 @@ namespace config {
         CL_BTN_A,
         DELAY(SMALL_DIALOG_DELAY),
 
-        CL_HAT_BTN_DOWN,
-        CL_HAT_BTN_DOWN,
-        CL_HAT_BTN_DOWN,
-        CL_HAT_BTN_DOWN,
+        CL_CROSS_BTN_DOWN,
+        CL_CROSS_BTN_DOWN,
+        CL_CROSS_BTN_DOWN,
+        CL_CROSS_BTN_DOWN,
         DELAY(SMALL_DIALOG_DELAY),
-        CL_HAT_BTN_DOWN,
+        CL_CROSS_BTN_DOWN,
         CL_BTN_A,
         DELAY(LARGE_DIALOG_DELAY),
 
@@ -32,10 +32,10 @@ namespace config {
         CL_BTN_A,
         DELAY(SMALL_DIALOG_DELAY),
 
-        CL_HAT_BTN_UP,
-        CL_HAT_BTN_RIGHT,
-        CL_HAT_BTN_DOWN,
-        CL_HAT_BTN_DOWN,
+        CL_CROSS_BTN_UP,
+        CL_CROSS_BTN_RIGHT,
+        CL_CROSS_BTN_DOWN,
+        CL_CROSS_BTN_DOWN,
         CL_BTN_A,
 
         DELAY(MENU_LOAD_DELAY),
@@ -48,9 +48,9 @@ namespace config {
 
         DELAY(SMALL_DIALOG_DELAY),
 
-        CL_HAT_BTN_DOWN,
-        CL_HAT_BTN_DOWN,
-        CL_HAT_BTN_DOWN,
+        CL_CROSS_BTN_DOWN,
+        CL_CROSS_BTN_DOWN,
+        CL_CROSS_BTN_DOWN,
         CL_BTN_A,
 
         DELAY(MEDIUM_DIALOG_DELAY),
@@ -59,10 +59,10 @@ namespace config {
 
         DELAY(MENU_LOAD_DELAY),
 
-        CL_HAT_BTN_UP,
-        CL_HAT_BTN_LEFT,
-        CL_HAT_BTN_UP,
-        CL_HAT_BTN_UP,
+        CL_CROSS_BTN_UP,
+        CL_CROSS_BTN_LEFT,
+        CL_CROSS_BTN_UP,
+        CL_CROSS_BTN_UP,
 
         END(true),
     };

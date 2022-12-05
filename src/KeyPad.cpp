@@ -98,7 +98,7 @@ void keypad::KeyPad::Scan() {
 
 void keypad::KeyPad::Send() {
     if (isDirty) {
-        SwitchController().SendReport();
+        switch_controller::controller.SendReport();
         isDirty = false;
     }
 }
@@ -121,6 +121,8 @@ void keypad::KeyPad::PlayMacro() {
 
         OperationLog(nullptr, re);
 
+        using switch_controller::controller;
+
         switch (re->type) {
         case Operation::DELAY:
             delay(re->param);
@@ -133,19 +135,19 @@ void keypad::KeyPad::PlayMacro() {
             break;
         // --------------------------------------------------------------------
         case Operation::PRESS:
-            SwitchController().Press(re->param);
-            SwitchController().SendReport();
+            controller.Press(re->param);
+            controller.SendReport();
             break;
         case Operation::RELEASE:
-            SwitchController().Release(re->param);
-            SwitchController().SendReport();
+            controller.Release(re->param);
+            controller.SendReport();
             break;
         case Operation::CLICK:
-            SwitchController().Press(re->param);
-            SwitchController().SendReport();
+            controller.Press(re->param);
+            controller.SendReport();
             delay(clickDelay);
-            SwitchController().Release(re->param);
-            SwitchController().SendReport();
+            controller.Release(re->param);
+            controller.SendReport();
             delay(clickEndDelay);
 
         default:
@@ -362,11 +364,11 @@ void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int laye
         break;
     // ------------------------------------------------------------------------
     case Operation::PRESS:
-        SwitchController().Press(re.param);
+        switch_controller::controller.Press(re.param);
         recorder.TryRecord(re);
         break;
     case Operation::RELEASE:
-        SwitchController().Release(re.param);
+        switch_controller::controller.Release(re.param);
         recorder.TryRecord(re);
         break;
     // ------------------------------------------------------------------------
@@ -399,7 +401,7 @@ void keypad::KeyPad::DoKeyRelease(Key &key, const Record &re, int r, int c, int 
         break;
     // ------------------------------------------------------------------------
     case Operation::PRESS:
-        SwitchController().Release(re.param);
+        switch_controller::controller.Release(re.param);
         recorder.TryRecord(Record(Operation::RELEASE, re.param));
         break;
     // ------------------------------------------------------------------------

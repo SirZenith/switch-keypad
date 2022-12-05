@@ -12,8 +12,6 @@ auto pad = keypad::KeyPad(
 );
 
 void setup() {
-    SwitchController();
-
 #ifdef DEBUG
     Serial.begin(115200);
 #endif

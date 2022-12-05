@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
-#include <SwitchControlLibrary.h>
+#include <SwitchController.h>
 
 #include "LayeringState.h"
 #include "MacroRecorder.h"

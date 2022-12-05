@@ -9,12 +9,12 @@ namespace config {
     const Record layer1[] = {
         // row1
         ML(2),
-        PR_HAT_BTN_UP,
+        PR_CROSS_BTN_UP,
         ML(1),
         // row2
-        PR_HAT_BTN_LEFT,
-        PR_HAT_BTN_DOWN,
-        PR_HAT_BTN_RIGHT,
+        PR_CROSS_BTN_LEFT,
+        PR_CROSS_BTN_DOWN,
+        PR_CROSS_BTN_RIGHT,
     };
 
     const Record layer2[] = {
