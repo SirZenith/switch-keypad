@@ -6,7 +6,7 @@
 namespace config {
     using keypad::Record;
 
-    const Record layer1[] = {
+    const Record baseLayer[] = {
         // row1
         ML(2),
         PR_CROSS_BTN_UP,
@@ -17,7 +17,7 @@ namespace config {
         PR_CROSS_BTN_RIGHT,
     };
 
-    const Record layer2[] = {
+    const Record functionKeyLayer[] = {
         // row1
         PR_BTN_X,
         PR_BTN_A,
@@ -27,7 +27,8 @@ namespace config {
         PR_BTN_B,
         HOLD(PR_BTN_L, PR_BTN_R),
     };
-    const Record layer3[] = {
+
+    const Record macroLayer[] = {
         // row1
         EMPTY,
         MACRO(0),
@@ -39,8 +40,8 @@ namespace config {
     };
 
     const Record *keyMap[] = {
-        layer1,
-        layer2,
-        layer3,
+        baseLayer,
+        functionKeyLayer,
+        macroLayer,
     };
 }

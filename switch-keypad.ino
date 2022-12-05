@@ -7,8 +7,8 @@ auto pad = keypad::KeyPad(
     config::row, config::col, config::layer,
     config::rowPinList, config::colPinList,
     config::keyMap, config::macroList,
-    config::DEBOUNCE, config::HOLD_THRESHOLD,
-    config::CLICK_DELAY, config::KEY_END_DELAY
+    config::debounce, config::holdThreshold,
+    config::clickDelay, config::clickEndDelay
 );
 
 void setup() {

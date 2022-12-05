@@ -16,9 +16,9 @@ using switch_controller::Stick;
 
 #define DELAY(time) \
     { Operation::DELAY, time }
-#define CLICK_DELAY(time) \
+#define CLICK_DELAY \
     { Operation::CLICK_DELAY, 0 }
-#define CLICK_END_DELAY(time) \
+#define CLICK_END_DELAY \
     { Operation::CLICK_END_DELAY, 0 }
 
 //----------------------------------------------------------------------------

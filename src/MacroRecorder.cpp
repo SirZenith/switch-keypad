@@ -1,10 +1,10 @@
 #include "MacroRecorder.h"
 
 keypad::MacroRecorder::MacroRecorder() {
-    records = new MacroRecord[capability];
+    records = new MacroRecord[capacity];
 }
 
-keypad::MacroRecorder::MacroRecorder(unsigned cap) : capability{cap} {
+keypad::MacroRecorder::MacroRecorder(unsigned cap) : capacity{cap} {
     records = cap > 0 ? new MacroRecord[cap] : nullptr;
 }
 
@@ -22,7 +22,11 @@ bool keypad::MacroRecorder::IsRecording() {
 
 unsigned keypad::MacroRecorder::SpareSpace() {
     // save 1 slot for Operation::END record, that's what "-1" for.
-    return capability - size - 1;
+    return capacity - size - 1;
+}
+
+unsigned keypad::MacroRecorder::Capacity() {
+    return capacity;
 }
 
 // ----------------------------------------------------------------------------
@@ -51,7 +55,7 @@ void keypad::MacroRecorder::EndRecording(bool isLoop) {
 // ----------------------------------------------------------------------------
 
 void keypad::MacroRecorder::Clear() {
-    if (capability == 0) {
+    if (capacity == 0) {
         return;
     }
 

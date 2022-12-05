@@ -12,9 +12,14 @@ namespace config {
     int rowPinList[] = {1, 0};
     int colPinList[] = {2, 3, 4};
 
-    const unsigned long DEBOUNCE = 600UL;
-    const unsigned long HOLD_THRESHOLD = 500UL * 1000UL;
+    // debounce threshold for switch, in microsecond.
+    const unsigned long debounce = 600UL;
+    // when a key press last longer then this amount of time, hold mapping for
+    // this key will be triggered if exists, in microsecond.
+    const unsigned long holdThreshold = 500UL * 1000UL;
 
-    const unsigned long CLICK_DELAY = 80UL;
-    const unsigned long KEY_END_DELAY = 80UL;
+    // how long should a CL command key press last, in millisecond.
+    const unsigned long clickDelay = 80UL;
+    // how long should keypad idle after an CL command key release, in millisecond.
+    const unsigned long clickEndDelay = 80UL;
 }

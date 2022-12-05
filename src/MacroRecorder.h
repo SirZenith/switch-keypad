@@ -6,7 +6,7 @@
 namespace keypad {
     class MacroRecorder {
     public:
-        static const unsigned MAX_RECORD_CAPABILITY = 200;
+        static const unsigned MAX_RECORD_CAPABILITY = 400;
 
         MacroRecorder();
         MacroRecorder(unsigned cap);
@@ -14,6 +14,7 @@ namespace keypad {
 
         bool IsRecording();
         unsigned SpareSpace();
+        unsigned Capacity();
 
         void ToggleRecording(bool isLoop = false);
         void StartRecording();
@@ -27,7 +28,7 @@ namespace keypad {
     private:
         bool isRecording = false;
         unsigned size = 0;
-        unsigned capability = MAX_RECORD_CAPABILITY;
+        unsigned capacity = MAX_RECORD_CAPABILITY;
         unsigned long lastRecordTime = 0;
         MacroRecord *records;
 
