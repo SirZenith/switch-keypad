@@ -58,8 +58,6 @@ const char *keypad::GetOperatioinName(Operation type) {
 
 // ----------------------------------------------------------------------------
 
-keypad::Record::Record() = default;
-
 keypad::Record::Record(Operation op, unsigned long param)
     : type{op},
       param{param},
@@ -76,7 +74,7 @@ keypad::Record::~Record() {
     }
 }
 
-void keypad::Record::SetOnHold(Record r) {
+void keypad::Record::SetOnHold(MacroRecord r) {
     onHold = new Record(r.type, r.param);
 }
 

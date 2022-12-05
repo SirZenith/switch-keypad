@@ -1,30 +1,19 @@
 #pragma once
 
-#include "LayeringState.h"
-#include "MacroRecorder.h"
-#include "common.h"
 #include <Arduino.h>
 #include <SwitchControlLibrary.h>
 
-namespace keypad {
-    struct MacroRecord {
-        bool isPlaying = false;
-        const Record *macro = nullptr;
-        int row, col;
+#include "LayeringState.h"
+#include "MacroRecorder.h"
+#include "common.h"
 
-        bool CheckHasMacroBinded();
-        bool CheckIsMacroPlaying();
-        
-        void ToggleMacro(const Record *macro, int r, int c);
-        void UpdateMacroBinding(const Record **macroList, int index, int r, int c);
-        void Unbind();
-    };
+namespace keypad {
     class KeyPad {
     public:
         KeyPad(
             int row, int col, int layer,
             int *rowPinList, int *colPinList,
-            const Record **keyMap, const Record **macroList,
+            const Record **keyMap, const MacroRecord **macroList,
             unsigned long debounce, unsigned long holdThreshold,
             unsigned long clickDelay, unsigned long clickEndDelay
         );
@@ -34,21 +23,35 @@ namespace keypad {
         void PlayMacro();
 
     private:
+        struct MacroTarget {
+            bool isPlaying = false;
+            const MacroRecord *macro = nullptr;
+            int row, col;
+
+            bool CheckHasMacroBinded();
+            bool CheckIsMacroPlaying();
+
+            void ToggleMacro(const MacroRecord *macro, int r, int c);
+            void UpdateMacroBinding(const MacroRecord **macroList, int index, int r, int c);
+            void Unbind();
+        };
+
         int row, col;
         int *rowPinList, *colPinList;
-        const Record **keyMap, **macroList;
+        const Record **keyMap;
+        const MacroRecord **macroList;
         unsigned long debounce, holdThreshold, clickDelay, clickEndDelay;
 
         Key **keyMatrix;
 
         LayeringState layeringState;
 
-        MacroRecord curMacro;
+        MacroTarget curMacro;
         MacroRecorder recorder;
 
         bool isDirty = false;
 
-        void OperationLog(const char *msg, const Record *re = nullptr);
+        void OperationLog(const char *msg, const MacroRecord *re = nullptr);
 
         bool DebounceCheck(int r, int c, unsigned long now);
         bool CheckIsActive(int c);

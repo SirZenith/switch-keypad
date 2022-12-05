@@ -1,7 +1,9 @@
 #pragma once
 
+#include <Arduino.h>
+
 namespace keypad {
-    enum class Operation {
+    enum class Operation : uint8_t {
         EMPTY,
         // --------------------------------------------------------------------
         // delay
@@ -30,17 +32,21 @@ namespace keypad {
 
     const char *GetOperatioinName(Operation type);
 
-    struct Record {
+    struct MacroRecord {
+        Operation type;
+        unsigned long param;
+    };
+
+    struct Record : MacroRecord {
         Operation type;
         unsigned long param;
         Record *onHold = nullptr;
 
-        Record();
         Record(Operation op, unsigned long param);
         Record(Record onTap, Record onHold);
         ~Record();
 
-        void SetOnHold(Record r);
+        void SetOnHold(MacroRecord r);
     };
 
     struct Key {

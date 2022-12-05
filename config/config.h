@@ -4,7 +4,6 @@
 #include "../src/key_name_macro.h"
 #include "key_map.h"
 #include "macro.h"
-#include <SwitchControlLibrary.h>
 
 namespace config {
     const int row = 2;

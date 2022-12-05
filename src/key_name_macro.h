@@ -1,10 +1,8 @@
 #pragma once
 
 #include "KeyPad.h"
-#include <SwitchControlLibrary.h>
 
 using keypad::Operation;
-using keypad::Record;
 using switch_controller::KeyCode;
 using switch_controller::Stick;
 

@@ -22,6 +22,7 @@ namespace keypad {
         void OneShotLayerOff();
 
     private:
+        // top bit mask
         static constexpr unsigned long LAYER_CHECK_MASK = ~(ULONG_MAX >> 1);
 
         unsigned long layerStateRecord = 0;

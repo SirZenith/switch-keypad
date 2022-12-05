@@ -2,27 +2,27 @@
 
 // ----------------------------------------------------------------------------
 
-bool keypad::MacroRecord::CheckHasMacroBinded() {
+bool keypad::KeyPad::MacroTarget::CheckHasMacroBinded() {
     return macro != nullptr;
 }
 
-bool keypad::MacroRecord::CheckIsMacroPlaying() {
+bool keypad::KeyPad::MacroTarget::CheckIsMacroPlaying() {
     return isPlaying && CheckHasMacroBinded();
 }
 
-void keypad::MacroRecord::ToggleMacro(const Record *macro, int r, int c) {
+void keypad::KeyPad::MacroTarget::ToggleMacro(const MacroRecord *macro, int r, int c) {
     row = r;
     col = c;
     macro = CheckHasMacroBinded() ? macro : nullptr;
 }
 
-void keypad::MacroRecord::UpdateMacroBinding(const Record **macroList, int index, int r, int c) {
+void keypad::KeyPad::MacroTarget::UpdateMacroBinding(const MacroRecord **macroList, int index, int r, int c) {
     row = r;
     col = c;
     macro = CheckHasMacroBinded() ? macroList[index] : nullptr;
 }
 
-void keypad::MacroRecord::Unbind() {
+void keypad::KeyPad::MacroTarget::Unbind() {
     macro = nullptr;
 }
 
@@ -31,7 +31,7 @@ void keypad::MacroRecord::Unbind() {
 keypad::KeyPad::KeyPad(
     int row, int col, int layer,
     int *rowPinList, int *colPinList,
-    const Record **keyMap, const Record **macroList,
+    const Record **keyMap, const MacroRecord **macroList,
     unsigned long debounce, unsigned long holdThreshold,
     unsigned long clickDelay, unsigned long clickEndDelay
 ) : row{row},
@@ -60,7 +60,7 @@ keypad::KeyPad::KeyPad(
     layeringState = LayeringState();
     layeringState.SetLayerCnt(layer);
 
-    curMacro = MacroRecord();
+    curMacro = MacroTarget();
 }
 
 keypad::KeyPad::~KeyPad() {
@@ -111,7 +111,7 @@ void keypad::KeyPad::PlayMacro() {
     digitalWrite(LED_BUILTIN, HIGH);
     OperationLog("[macro]: start");
 
-    const Record *re = curMacro.macro;
+    const MacroRecord *re = curMacro.macro;
     for (; re->type != Operation::END; ++re) {
         if (CheckIsActive(curMacro.row, curMacro.col)) {
             OperationLog("[macro]: end");
@@ -162,7 +162,8 @@ void keypad::KeyPad::PlayMacro() {
 
 // ----------------------------------------------------------------------------
 
-void keypad::KeyPad::OperationLog(const char *msg, const Record *re) {
+void keypad::KeyPad::OperationLog(const char *msg, const MacroRecord *re) {
+#ifdef DEBUG
     Serial.print(msg);
 
     if (re != nullptr) {
@@ -191,7 +192,6 @@ void keypad::KeyPad::OperationLog(const char *msg, const Record *re) {
     }
 
     Serial.print("\n");
-#ifdef DEBUG
 #endif
 }
 

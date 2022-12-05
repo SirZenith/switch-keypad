@@ -4,7 +4,7 @@
 #include "../src/key_name_macro.h"
 
 namespace config {
-    using keypad::Record;
+    using keypad::MacroRecord;
     using switch_controller::KeyCode;
 
     const unsigned long SMALL_DIALOG_DELAY = 100;
@@ -12,7 +12,7 @@ namespace config {
     const unsigned long LARGE_DIALOG_DELAY = 600;
     const unsigned long MENU_LOAD_DELAY = 2500;
 
-    const Record macroItemCopy[] = {
+    const MacroRecord macroItemCopy[] = {
         CL_BTN_A,
         DELAY(SMALL_DIALOG_DELAY),
 
@@ -67,13 +67,13 @@ namespace config {
         END(true),
     };
 
-    const Record macroSendToBoxBugTrigger[] = {
+    const MacroRecord macroSendToBoxBugTrigger[] = {
         CL_BTN_A,
         CL_BTN_B,
         END(false),
     };
 
-    const Record *macroList[] = {
+    const MacroRecord *macroList[] = {
         macroItemCopy,
         macroSendToBoxBugTrigger,
     };

@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #include "config/config.h"
 #include "src/KeyPad.h"
 

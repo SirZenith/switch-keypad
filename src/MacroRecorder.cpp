@@ -1,11 +1,11 @@
 #include "MacroRecorder.h"
 
 keypad::MacroRecorder::MacroRecorder() {
-    records = new Record[capability];
+    records = new MacroRecord[capability];
 }
 
 keypad::MacroRecorder::MacroRecorder(unsigned cap) : capability{cap} {
-    records = cap > 0 ? new Record[cap] : nullptr;
+    records = cap > 0 ? new MacroRecord[cap] : nullptr;
 }
 
 keypad::MacroRecorder::~MacroRecorder() {
@@ -42,7 +42,7 @@ void keypad::MacroRecorder::StartRecording() {
 }
 
 void keypad::MacroRecorder::EndRecording(bool isLoop) {
-    Record &target = records[size];
+    MacroRecord &target = records[size];
     target.type = Operation::END;
     target.param = (unsigned long)isLoop;
     ++size;
@@ -56,7 +56,7 @@ void keypad::MacroRecorder::Clear() {
     }
 
     size = 0;
-    Record &target = records[0];
+    MacroRecord &target = records[0];
     target.type = Operation::END;
     target.param = (unsigned long)false;
 }
@@ -79,14 +79,14 @@ bool keypad::MacroRecorder::TryRecord(const Record &re) {
 
 // ----------------------------------------------------------------------------
 
-const keypad::Record *keypad::MacroRecorder::GetMacro() {
+const keypad::MacroRecord *keypad::MacroRecorder::GetMacro() {
     return records;
 }
 
 // ----------------------------------------------------------------------------
 
 void keypad::MacroRecorder::Push(Operation type, unsigned long param) {
-    Record &target = records[size];
+    MacroRecord &target = records[size];
     target.type = type;
     target.param = param;
     ++size;
