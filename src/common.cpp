@@ -37,7 +37,7 @@ const char *keypad::GetOperatioinName(Operation type) {
     case Operation::DEFAULT_LAYER:
         name = "default-layer";
         break;
-    // ---------------------------------------------------------------------------- 
+    // ----------------------------------------------------------------------------
     case Operation::PRESS:
         name = "press";
         break;
@@ -58,14 +58,20 @@ const char *keypad::GetOperatioinName(Operation type) {
 
 // ----------------------------------------------------------------------------
 
-keypad::Record::Record(Operation op, unsigned long param)
+keypad::MacroRecord::MacroRecord() = default;
+
+keypad::MacroRecord::MacroRecord(Operation op, unsigned long param)
     : type{op},
-      param{param},
+      param{param} {}
+
+// ----------------------------------------------------------------------------
+
+keypad::Record::Record(Operation op, unsigned long param)
+    : MacroRecord(op, param),
       onHold{nullptr} {}
 
 keypad::Record::Record(Record onTap, Record onHold)
-    : type{onTap.type},
-      param{onTap.param},
+    : MacroRecord(onTap.type, onTap.param),
       onHold{new Record(onHold.type, onHold.param)} {}
 
 keypad::Record::~Record() {
@@ -77,4 +83,3 @@ keypad::Record::~Record() {
 void keypad::Record::SetOnHold(MacroRecord r) {
     onHold = new Record(r.type, r.param);
 }
-
