@@ -35,11 +35,12 @@ namespace keypad {
     struct MacroRecord {
         Operation type;
         unsigned long param;
+
+        MacroRecord();
+        MacroRecord(Operation op, unsigned long param);
     };
 
     struct Record : MacroRecord {
-        Operation type;
-        unsigned long param;
         Record *onHold = nullptr;
 
         Record(Operation op, unsigned long param);
