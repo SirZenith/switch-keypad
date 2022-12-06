@@ -258,12 +258,20 @@ void keypad::KeyPad::UpdateLEDState() {
         yellowLEDState = HIGH;
     }
 
-    digitalWrite(redLEDPin, redLEDState);
-    digitalWrite(orangeLEDPin, orangeLEDState);
-    digitalWrite(yellowLEDPin, yellowLEDState);
-    digitalWrite(blueLEDPin, blueLEDState);
+    UpdateLED(redLEDPin, redLEDState);
+    UpdateLED(orangeLEDPin, orangeLEDState);
+    UpdateLED(yellowLEDPin, yellowLEDState);
+    UpdateLED(blueLEDPin, blueLEDState);
 
     lastLEDUpdateTime = now;
+}
+
+void keypad::KeyPad::UpdateLED(int pin, int value) {
+    if (pin == NO_LED_PIN) {
+        return;
+    }
+
+    digitalWrite(pin, value);
 }
 
 // ----------------------------------------------------------------------------

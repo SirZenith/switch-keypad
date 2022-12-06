@@ -71,6 +71,7 @@ namespace keypad {
 
         void OperationLog(const char *msg, const MacroRecord *re = nullptr);
         void UpdateLEDState();
+        void UpdateLED(int pin, int value);
 
         bool DebounceCheck(int r, int c, unsigned long now);
         bool CheckIsActive(int c);
