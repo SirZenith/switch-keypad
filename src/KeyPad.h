@@ -18,6 +18,8 @@ namespace keypad {
             unsigned long clickDelay, unsigned long clickEndDelay
         );
         ~KeyPad();
+
+        void Begin();
         void Scan();
         void Send();
         void PlayMacro();

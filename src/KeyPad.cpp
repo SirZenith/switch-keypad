@@ -72,6 +72,10 @@ keypad::KeyPad::~KeyPad() {
 
 // ----------------------------------------------------------------------------
 
+void keypad::KeyPad::Begin() {
+    switch_controller::controller.Begin();
+}
+
 void keypad::KeyPad::Scan() {
     if (curMacro.CheckIsMacroPlaying()) {
         return;
