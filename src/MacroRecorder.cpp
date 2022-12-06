@@ -46,10 +46,14 @@ void keypad::MacroRecorder::StartRecording() {
 }
 
 void keypad::MacroRecorder::EndRecording(bool isLoop) {
-    MacroRecord &target = records[size];
-    target.type = Operation::END;
-    target.param = (unsigned long)isLoop;
-    ++size;
+    bool ok = TryRecord(Record(Operation::END, 0));
+
+    if (!ok) {
+        MacroRecord &target = records[size];
+        target.type = Operation::END;
+        target.param = (unsigned long)isLoop;
+        ++size;
+    }
 }
 
 // ----------------------------------------------------------------------------

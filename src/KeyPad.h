@@ -10,6 +10,12 @@
 namespace keypad {
     class KeyPad {
     public:
+        static const int NO_LED_PIN = -1;
+        static const unsigned long MIN_LED_UPDATE_STEP = 100;
+        static const unsigned long BLINK_TIME = 1000;
+        static const unsigned long FAST_BLINK_TIME = 500;
+        static const unsigned long SUPER_FAST_BLINK_TIME = 250;
+
         KeyPad(
             int row, int col, int layer,
             int *rowPinList, int *colPinList,
@@ -19,6 +25,7 @@ namespace keypad {
         );
         ~KeyPad();
 
+        void SetLEDPin(int red, int orange, int yellow, int blue);
         void Begin();
         void End();
         bool Ready();
@@ -46,6 +53,13 @@ namespace keypad {
         const MacroRecord **macroList;
         unsigned long debounce, holdThreshold, clickDelay, clickEndDelay;
 
+        unsigned long lastLEDUpdateTime = 0;
+
+        int redLEDPin = NO_LED_PIN, redLEDState = LOW;
+        int orangeLEDPin = NO_LED_PIN, orangeLEDState = LOW;
+        int yellowLEDPin = NO_LED_PIN, yellowLEDState = LOW;
+        int blueLEDPin = NO_LED_PIN, blueLEDState = LOW;
+
         Key **keyMatrix;
 
         LayeringState layeringState;
@@ -56,6 +70,7 @@ namespace keypad {
         bool isDirty = false;
 
         void OperationLog(const char *msg, const MacroRecord *re = nullptr);
+        void UpdateLEDState();
 
         bool DebounceCheck(int r, int c, unsigned long now);
         bool CheckIsActive(int c);

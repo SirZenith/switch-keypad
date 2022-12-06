@@ -72,6 +72,13 @@ keypad::KeyPad::~KeyPad() {
 
 // ----------------------------------------------------------------------------
 
+void keypad::KeyPad::SetLEDPin(int red, int orange, int yellow, int blue) {
+    redLEDPin = red;
+    orangeLEDPin = orange;
+    yellowLEDPin = yellow;
+    blueLEDPin = blue;
+}
+
 void keypad::KeyPad::Begin() {
     switch_controller::controller.Begin();
 }
@@ -85,6 +92,8 @@ bool keypad::KeyPad::Ready() {
 }
 
 void keypad::KeyPad::Scan() {
+    // If macro is playing, keyboard scan is locked, so that keyboard layer will
+    // stay the same as when macro started.
     if (curMacro.CheckIsMacroPlaying()) {
         return;
     }
@@ -106,6 +115,8 @@ void keypad::KeyPad::Scan() {
 
         digitalWrite(rowPinList[r], HIGH);
     }
+
+    UpdateLEDState();
 }
 
 void keypad::KeyPad::Send() {
@@ -120,7 +131,6 @@ void keypad::KeyPad::PlayMacro() {
         return;
     }
 
-    digitalWrite(LED_BUILTIN, HIGH);
     OperationLog("[macro]: start");
 
     const MacroRecord *re = curMacro.macro;
@@ -131,6 +141,7 @@ void keypad::KeyPad::PlayMacro() {
             break;
         }
 
+        UpdateLEDState();
         OperationLog(nullptr, re);
 
         using switch_controller::controller;
@@ -170,8 +181,6 @@ void keypad::KeyPad::PlayMacro() {
     if (re->type == Operation::END && re->param == 0) {
         curMacro.Unbind();
     }
-
-    digitalWrite(LED_BUILTIN, LOW);
 }
 
 // ----------------------------------------------------------------------------
@@ -207,6 +216,54 @@ void keypad::KeyPad::OperationLog(const char *msg, const MacroRecord *re) {
 
     Serial.print("\n");
 #endif
+}
+
+void keypad::KeyPad::UpdateLEDState() {
+    unsigned long now = millis();
+    unsigned long deltaTime = now - lastLEDUpdateTime;
+
+    if (deltaTime < MIN_LED_UPDATE_STEP) {
+        return;
+    }
+
+    if (recorder.IsRecording()) {
+        // recording macro
+        unsigned int spareSpace = recorder.SpareSpace();
+        unsigned int capacity = recorder.Capacity();
+        float percentage = float(spareSpace) / float(capacity);
+
+        if (percentage > 0.5) {
+            redLEDPin = HIGH;
+        } else {
+            unsigned long gap = ULONG_MAX;
+            if (percentage > 0.25) {
+                gap = BLINK_TIME;
+            } else if (percentage > 0.125) {
+                gap = FAST_BLINK_TIME;
+            } else if (percentage > 0) {
+                gap = SUPER_FAST_BLINK_TIME;
+            }
+
+            if (deltaTime > gap) {
+                redLEDState = !redLEDState;
+            }
+        }
+    } else if (curMacro.CheckIsMacroPlaying()) {
+        // playing macro
+        if (deltaTime > BLINK_TIME) {
+            blueLEDState = !blueLEDState;
+        }
+    } else if (isDirty) {
+        // normal state
+        yellowLEDState = HIGH;
+    }
+
+    digitalWrite(redLEDPin, redLEDState);
+    digitalWrite(orangeLEDPin, orangeLEDState);
+    digitalWrite(yellowLEDPin, yellowLEDState);
+    digitalWrite(blueLEDPin, blueLEDState);
+
+    lastLEDUpdateTime = now;
 }
 
 // ----------------------------------------------------------------------------
@@ -358,7 +415,7 @@ void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int laye
         curMacro.isPlaying = false;
         curMacro.ToggleMacro(recorder.GetMacro(), r, c);
         break;
-    // ------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     case Operation::MOMENT_LAYER:
         key.layer = layer;
         layeringState.ActivateLayer(re.param);
@@ -374,7 +431,7 @@ void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int laye
     case Operation::DEFAULT_LAYER:
         layeringState.SetDefaultLayer(re.param);
         break;
-    // ------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     case Operation::PRESS:
         switch_controller::controller.Press(re.param);
         recorder.TryRecord(re);
@@ -383,7 +440,7 @@ void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int laye
         switch_controller::controller.Release(re.param);
         recorder.TryRecord(re);
         break;
-    // ------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     default:
         isDirty = false;
         break;
@@ -398,7 +455,7 @@ void keypad::KeyPad::DoKeyRelease(Key &key, const Record &re, int r, int c, int 
     case Operation::MACRO_PLAY_RECORDED:
         curMacro.isPlaying = true;
         break;
-    // ------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     case Operation::MOMENT_LAYER:
         key.layer = LayeringState::NO_LAYER;
         layeringState.DeactivateLayer(re.param);
@@ -411,12 +468,12 @@ void keypad::KeyPad::DoKeyRelease(Key &key, const Record &re, int r, int c, int 
         break;
     case Operation::DEFAULT_LAYER:
         break;
-    // ------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     case Operation::PRESS:
         switch_controller::controller.Release(re.param);
         recorder.TryRecord(Record(Operation::RELEASE, re.param));
         break;
-    // ------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     default:
         isDirty = false;
         break;
