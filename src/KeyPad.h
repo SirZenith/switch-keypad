@@ -20,6 +20,8 @@ namespace keypad {
         ~KeyPad();
 
         void Begin();
+        void End();
+        bool Ready();
         void Scan();
         void Send();
         void PlayMacro();

@@ -31,9 +31,17 @@ void setup() {
         int colPin = config::colPinList[c];
         pinMode(colPin, INPUT_PULLUP);
     }
+
+    while (!USBDevice.mounted()) {
+        delay(1);
+    }
 }
 
 void loop() {
+    if (!pad.Ready()) {
+        return;
+    }
+
     pad.Scan();
     pad.Send();
     pad.PlayMacro();
