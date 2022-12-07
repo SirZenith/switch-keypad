@@ -3,7 +3,9 @@
 #include <Arduino.h>
 #include <SwitchController.h>
 
+#include "KeyHandler.h"
 #include "LayeringState.h"
+#include "MacroPlayer.h"
 #include "MacroRecorder.h"
 #include "common.h"
 
@@ -19,39 +21,43 @@ namespace keypad {
         KeyPad(
             int row, int col, int layer,
             int *rowPinList, int *colPinList,
-            const Record **keyMap, const MacroRecord **macroList,
             unsigned long debounce, unsigned long holdThreshold,
-            unsigned long clickDelay, unsigned long clickEndDelay
+
+            const Record **keyMap,
+            MacroPlayer &macroPlayer,
+            KeyHandler **handlers
         );
         ~KeyPad();
 
         void SetLEDPin(int red, int orange, int yellow, int blue);
+        void SetHandler(uint index);
+
         void Begin();
         void End();
+
         bool Ready();
-        void Scan();
         void Send();
+
+        void Scan();
         void PlayMacro();
+        void UpdateLEDs();
 
     private:
-        struct MacroTarget {
-            bool isPlaying = false;
-            const MacroRecord *macro = nullptr;
-            int row, col;
-
-            bool CheckHasMacroBinded();
-            bool CheckIsMacroPlaying();
-
-            void ToggleMacro(const MacroRecord *macro, int r, int c);
-            void UpdateMacroBinding(const MacroRecord **macroList, int index, int r, int c);
-            void Unbind();
-        };
-
         int row, col;
         int *rowPinList, *colPinList;
+        unsigned long debounce, holdThreshold;
+
         const Record **keyMap;
-        const MacroRecord **macroList;
-        unsigned long debounce, holdThreshold, clickDelay, clickEndDelay;
+
+        Key **keyMatrix;
+        LayeringState layeringState;
+        MacroRecorder recorder;
+
+        MacroPlayer &macroPlayer;
+
+        uint handlerCnt = 0;
+        KeyHandler **handlers = nullptr;
+        KeyHandler *handler = nullptr;
 
         unsigned long lastLEDUpdateTime = 0;
 
@@ -60,17 +66,7 @@ namespace keypad {
         int yellowLEDPin = NO_LED_PIN, yellowLEDState = LOW;
         int blueLEDPin = NO_LED_PIN, blueLEDState = LOW;
 
-        Key **keyMatrix;
-
-        LayeringState layeringState;
-
-        MacroTarget curMacro;
-        MacroRecorder recorder;
-
-        bool isDirty = false;
-
         void OperationLog(const char *msg, const MacroRecord *re = nullptr);
-        void UpdateLEDState();
         void UpdateLED(int pin, int value);
 
         bool DebounceCheck(int r, int c, unsigned long now);

@@ -1,5 +1,7 @@
 #include "LayeringState.h"
 
+keypad::LayeringState::LayeringState(int layerCnt) : layerCnt{layerCnt} {}
+
 int keypad::LayeringState::SetLayerCnt(int cnt) {
     if (cnt <= 0) {
         layerCnt = 1;

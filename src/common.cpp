@@ -37,6 +37,10 @@ const char *keypad::GetOperatioinName(Operation type) {
     case Operation::DEFAULT_LAYER:
         name = "default-layer";
         break;
+    // -----------------------------------------------------------------------------
+    case Operation::CHANGE_HANDLER:
+        name = "handler";
+        break;
     // ----------------------------------------------------------------------------
     case Operation::PRESS:
         name = "press";

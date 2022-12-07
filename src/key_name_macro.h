@@ -12,7 +12,7 @@ using switch_controller::Stick;
 #define EMPTY \
     { Operation::EMPTY, 0 }
 
-// ----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 #define DELAY(time) \
     { Operation::DELAY, time }
@@ -21,7 +21,7 @@ using switch_controller::Stick;
 #define CLICK_END_DELAY \
     { Operation::CLICK_END_DELAY, 0 }
 
-//----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 #define MACRO(index) \
     { Operation::MACRO, index }
@@ -34,7 +34,7 @@ using switch_controller::Stick;
 #define END(isRepeat) \
     { Operation::END, isRepeat }
 
-// ----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 #define ML(layer) \
     { Operation::MOMENT_LAYER, layer }
@@ -45,7 +45,12 @@ using switch_controller::Stick;
 #define DFL(layer) \
     { Operation::DEFAULT_LAYER, layer }
 
-// ----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+
+#define HANDLER(i) \
+    { Operation::CHANGE_HANDLER, i }
+
+// -----------------------------------------------------------------------------
 
 #define PR_BTN_A \
     { Operation::PRESS, KeyCode::BTN_A }
@@ -130,7 +135,7 @@ using switch_controller::Stick;
 #define PR_R_STICK_FREE(x, y) \
     { Operation::PRESS, PR_R_STICK_VALUE(x, y) }
 
-// ----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 #define RE_BTN_A \
     { Operation::RELEASE, KeyCode::BTN_A }
@@ -215,7 +220,7 @@ using switch_controller::Stick;
 #define RE_R_STICK_FREE(x, y) \
     { Operation::RELEASE, RE_R_STICK_VALUE(x, y) }
 
-// ----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 #define CL_BTN_A \
     { Operation::CLICK, KeyCode::BTN_A }

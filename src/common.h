@@ -23,6 +23,9 @@ namespace keypad {
         ONE_SHOT_LAYER,
         TOGGLE_LAYER,
         DEFAULT_LAYER,
+        // -----------------------------------------------------------------------------
+        // backend
+        CHANGE_HANDLER,
         // --------------------------------------------------------------------
         // button operation
         PRESS,
