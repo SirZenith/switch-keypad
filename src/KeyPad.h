@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Arduino.h>
-#include <SwitchController.h>
 
 #include "KeyHandler.h"
 #include "LayeringState.h"

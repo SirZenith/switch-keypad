@@ -1,7 +1,9 @@
 #pragma once
 
-#include "../src/KeyPad.h"
-#include "../src/key_name_macro.h"
+#include "../src/common.h"
+#include "../src/keycode/common.h"
+#include "../src/keycode/switch.h"
+#include "../src/keycode/keyboard.h"
 
 namespace config {
     using keypad::Record;

@@ -1,6 +1,6 @@
 #pragma once
 
-// #include "Keyboard.h"
+#include <TinyUSB_Mouse_and_Keyboard.h>
 
 #include "../KeyHandler.h"
 
@@ -18,7 +18,9 @@ namespace backend {
         void Press(unsigned long param);
         void Release(unsigned long param);
 
+        void OperationLog(const char *msg, const keypad::MacroRecord *re);
     private:
         bool isDirty = false;
+        TinyKeyboard_ keyboard;
     };
 }

@@ -36,3 +36,38 @@ void backend::SwitchController::Release(unsigned long param) {
     switch_controller::controller.Release((switch_controller::KeyCode)param);
     isDirty = true;
 }
+
+// -----------------------------------------------------------------------------
+
+void backend::SwitchController::OperationLog(const char *msg, const keypad::MacroRecord *re) {
+    Serial.print(msg);
+
+    if (re != nullptr) {
+        const char *name = nullptr;
+        unsigned long value = 0;
+
+        using keypad::Operation;
+
+        switch (re->type) {
+        case Operation::PRESS:
+        case Operation::RELEASE:
+        case Operation::CLICK:
+            using switch_controller::KeyCode;
+
+            name = switch_controller::GetNameOfKeyCode((KeyCode)re->param);
+            value = switch_controller::GetValueInKeyCode((KeyCode)re->param);
+            break;
+
+        default:
+            name = keypad::GetOperatioinName(re->type);
+            value = re->param;
+            break;
+        }
+        Serial.print(name);
+        Serial.print("(");
+        Serial.print(value);
+        Serial.print(")");
+    }
+
+    Serial.print("\n");
+}

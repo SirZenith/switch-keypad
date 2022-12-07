@@ -112,8 +112,6 @@ void keypad::KeyPad::PlayMacro() {
 
     OperationLog(nullptr, re);
 
-    using switch_controller::controller;
-
     switch (re->type) {
     case Operation::DELAY:
         macroPlayer.Delay(re->param);
@@ -132,17 +130,17 @@ void keypad::KeyPad::PlayMacro() {
         break;
     // -------------------------------------------------------------------------
     case Operation::PRESS:
-        controller.Press(re->param);
+        handler->Press(re->param);
         break;
     case Operation::RELEASE:
-        controller.Release(re->param);
+        handler->Release(re->param);
         break;
     case Operation::CLICK:
         if (!macroPlayer.CheckNeedClick()) {
-            controller.Press(re->param);
+            handler->Press(re->param);
             macroPlayer.ClickDelay();
         } else {
-            controller.Release(re->param);
+            handler->Release(re->param);
             macroPlayer.ClickEndDelay();
         }
         break;
@@ -204,34 +202,7 @@ void keypad::KeyPad::UpdateLEDs() {
 
 void keypad::KeyPad::OperationLog(const char *msg, const MacroRecord *re) {
 #ifdef DEBUG
-    Serial.print(msg);
-
-    if (re != nullptr) {
-        const char *name = nullptr;
-        unsigned long value = 0;
-
-        switch (re->type) {
-        case Operation::PRESS:
-        case Operation::RELEASE:
-        case Operation::CLICK:
-            using switch_controller::KeyCode;
-
-            name = switch_controller::GetNameOfKeyCode((KeyCode)re->param);
-            value = switch_controller::GetValueInKeyCode((KeyCode)re->param);
-            break;
-
-        default:
-            name = GetOperatioinName(re->type);
-            value = re->param;
-            break;
-        }
-        Serial.print(name);
-        Serial.print("(");
-        Serial.print(value);
-        Serial.print(")");
-    }
-
-    Serial.print("\n");
+    handler->OperationLog(msg, re);
 #endif
 }
 
@@ -412,11 +383,11 @@ void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int laye
         break;
     // -------------------------------------------------------------------------
     case Operation::PRESS:
-        switch_controller::controller.Press(re.param);
+        handler->Press(re.param);
         recorder.TryRecord(re);
         break;
     case Operation::RELEASE:
-        switch_controller::controller.Release(re.param);
+        handler->Release(re.param);
         recorder.TryRecord(re);
         break;
     // -------------------------------------------------------------------------

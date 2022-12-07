@@ -3,17 +3,17 @@
 #include "config/config.h"
 #include "src/KeyPad.h"
 #include "src/backend/SwitchController.h"
-#include "src/backend/KeyboardHandler.h"
+#include "src/backend/Keyboard.h"
 
 using keypad::KeyHandler;
 
 auto macroPlayer = keypad::MacroPlayer(config::macroList, config::clickDelay, config::clickEndDelay);
 
 auto switchController = backend::SwitchController();
-// auto keyboard = backend::Keyboard();
+auto keyboard = backend::Keyboard();
 KeyHandler *handlers[] = {
     (KeyHandler *)&switchController,
-    // (KeyHandler *)&keyboard,
+    (KeyHandler *)&keyboard,
     NULL,
 };
 
