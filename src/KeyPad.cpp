@@ -57,6 +57,7 @@ void keypad::KeyPad::SetLEDPin(int red, int orange, int yellow, int blue) {
 void keypad::KeyPad::SetHandler(int index) {
     handler = index < handlerCnt ? handlers[index] : handler;
     layeringState.SetDefaultLayer(handler->DefaultLayer());
+    changeHandlerLEDBlinkCnt = CHANGE_HANDLER_LED_BLINK_CNT;
 }
 
 // -----------------------------------------------------------------------------
@@ -158,13 +159,18 @@ void keypad::KeyPad::PlayMacro() {
 }
 
 void keypad::KeyPad::UpdateLEDs() {
+#ifdef USE_LED
     unsigned long now = millis();
-    unsigned long deltaTime = now - lastLEDUpdateTime;
+    unsigned long deltaTime = now > lastLEDUpdateTime
+                                  ? now - lastLEDUpdateTime
+                                  : ULONG_LONG_MAX - lastLEDUpdateTime + now;
 
     if (deltaTime < MIN_LED_UPDATE_STEP) {
         return;
     }
 
+    // -------------------------------------------------------------------------
+    // Red
     if (recorder.IsRecording()) {
         // recording macro
         unsigned int spareSpace = recorder.SpareSpace();
@@ -189,22 +195,39 @@ void keypad::KeyPad::UpdateLEDs() {
         } else {
             redLEDState = LOW;
         }
-    } else if (macroPlayer.CheckIsMacroPlaying()) {
+    }
+    UpdateLED(redLEDPin, redLEDState);
+
+    // -------------------------------------------------------------------------
+    // Orange
+    if (changeHandlerLEDBlinkCnt > 0) {
+        orangeLEDState = !orangeLEDState;
+        if (!orangeLEDState) {
+            --changeHandlerLEDBlinkCnt;
+        }
+    }
+    UpdateLED(orangeLEDPin, orangeLEDState);
+
+    // -------------------------------------------------------------------------
+    // Yellow
+    if (handler->Dirty()) {
+        // normal state
+        yellowLEDState = HIGH;
+    }
+    UpdateLED(yellowLEDPin, yellowLEDState);
+
+    // -------------------------------------------------------------------------
+    // Blue
+    if (macroPlayer.CheckIsMacroPlaying()) {
         // playing macro
         if (deltaTime > BLINK_TIME) {
             blueLEDState = !blueLEDState;
         }
-    } else if (handler->Dirty()) {
-        // normal state
-        yellowLEDState = HIGH;
     }
-
-    UpdateLED(redLEDPin, redLEDState);
-    UpdateLED(orangeLEDPin, orangeLEDState);
-    UpdateLED(yellowLEDPin, yellowLEDState);
     UpdateLED(blueLEDPin, blueLEDState);
 
     lastLEDUpdateTime = now;
+#endif
 }
 
 void keypad::KeyPad::Step() {

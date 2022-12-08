@@ -43,6 +43,8 @@ namespace keypad {
 
         void Step();
     private:
+        static const int CHANGE_HANDLER_LED_BLINK_CNT = 2;
+
         int row, col;
         int *rowPinList, *colPinList;
         unsigned long debounce, holdThreshold;
@@ -65,6 +67,8 @@ namespace keypad {
         int orangeLEDPin = NO_LED_PIN, orangeLEDState = LOW;
         int yellowLEDPin = NO_LED_PIN, yellowLEDState = LOW;
         int blueLEDPin = NO_LED_PIN, blueLEDState = LOW;
+
+        int changeHandlerLEDBlinkCnt = 0;
 
         void OperationLog(const char *msg, const MacroRecord *re = nullptr);
         void UpdateLED(int pin, int value);

@@ -21,9 +21,14 @@ void setup() {
 
     pad.Begin();
     pad.SetHandler(0);
-
-    pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, LOW);
+#ifdef USE_LED
+    pad.SetLEDPin(
+        config::ledRedPin,
+        config::ledOrnagePin,
+        config::ledYellowPin,
+        config::ledBluePin
+    );
+#endif
 
     for (int r = 0; r < config::row; ++r) {
         int rowPin = config::rowPinList[r];

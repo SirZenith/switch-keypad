@@ -4,6 +4,7 @@
 
 #define USE_SWITCH_CONTROLLER 1
 #define USE_KEYBOARD 1
+#define USE_LED 1
 
 // -----------------------------------------------------------------------------
 
@@ -28,4 +29,9 @@ namespace config {
     const unsigned long clickDelay = 80UL;
     // how long should keypad idle after an CL command key release, in millisecond.
     const unsigned long clickEndDelay = 80UL;
+
+    int ledRedPin = 0;
+    int ledOrnagePin = 0;
+    int ledYellowPin = 0;
+    int ledBluePin = 0;
 }
