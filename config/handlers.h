@@ -1,15 +1,16 @@
 #pragma once
 
 #include "../src/KeyHandler.h"
+#include "../src/backend/Keyboard.h"
+#include "../src/backend/SwitchController.h"
+#include "key_map.h"
 
 namespace config {
 #ifdef USE_SWITCH_CONTROLLER
-#include "../src/backend/SwitchController.h"
     auto switchController = backend::SwitchController(config::switchControllerDFL);
 #endif
 
 #ifdef USE_KEYBOARD
-#include "../src/backend/Keyboard.h"
     auto keyboard = backend::Keyboard(config::keyboardDFL);
 #endif
 
