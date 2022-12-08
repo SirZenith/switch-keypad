@@ -7,11 +7,14 @@
 namespace backend {
     class SwitchController : keypad::KeyHandler {
     public:
+        SwitchController(unsigned int defaultLayer);
+
         void Begin();
         void End();
 
         bool Ready();
         bool Dirty();
+        // unsigned int 
 
         void Send();
 

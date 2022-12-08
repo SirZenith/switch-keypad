@@ -1,13 +1,20 @@
 #pragma once
 
+// -----------------------------------------------------------------------------
+
+#define USE_SWITCH_CONTROLLER 1
+#define USE_KEYBOARD 1
+
+// -----------------------------------------------------------------------------
+
 #include "../src/KeyPad.h"
 #include "key_map.h"
 #include "macro.h"
+#include "handlers.h"
 
 namespace config {
     const int row = 2;
     const int col = 3;
-    const int layer = 7;
     int rowPinList[] = {1, 0};
     int colPinList[] = {2, 3, 4};
 

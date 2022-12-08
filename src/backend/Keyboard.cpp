@@ -2,6 +2,9 @@
 
 // -----------------------------------------------------------------------------
 
+backend::Keyboard::Keyboard(unsigned int defaultLayer)
+    : KeyHandler(defaultLayer) {}
+
 void backend::Keyboard::Begin() {
     ::Keyboard.begin();
 }

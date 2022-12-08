@@ -2,28 +2,16 @@
 
 #include "config/config.h"
 #include "src/KeyPad.h"
-#include "src/backend/SwitchController.h"
-#include "src/backend/Keyboard.h"
-
-using keypad::KeyHandler;
 
 auto macroPlayer = keypad::MacroPlayer(config::macroList, config::clickDelay, config::clickEndDelay);
 
-auto switchController = backend::SwitchController();
-auto keyboard = backend::Keyboard();
-KeyHandler *handlers[] = {
-    (KeyHandler *)&switchController,
-    (KeyHandler *)&keyboard,
-    NULL,
-};
-
 auto pad = keypad::KeyPad(
-    config::row, config::col, config::layer,
+    config::row, config::col,
     config::rowPinList, config::colPinList,
     config::debounce, config::holdThreshold,
     config::keyMap,
     macroPlayer,
-    handlers
+    config::handlers
 );
 
 void setup() {
@@ -54,13 +42,5 @@ void setup() {
 }
 
 void loop() {
-    if (!pad.Ready()) {
-        return;
-    }
-
-    pad.Scan();
-    pad.PlayMacro();
-
-    pad.Send();
-    pad.UpdateLEDs();
+    pad.Step();
 }

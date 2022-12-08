@@ -18,7 +18,7 @@ namespace keypad {
         static const unsigned long SUPER_FAST_BLINK_TIME = 250;
 
         KeyPad(
-            int row, int col, int layer,
+            int row, int col,
             int *rowPinList, int *colPinList,
             unsigned long debounce, unsigned long holdThreshold,
 
@@ -29,7 +29,7 @@ namespace keypad {
         ~KeyPad();
 
         void SetLEDPin(int red, int orange, int yellow, int blue);
-        void SetHandler(uint index);
+        void SetHandler(int index);
 
         void Begin();
         void End();
@@ -41,6 +41,7 @@ namespace keypad {
         void PlayMacro();
         void UpdateLEDs();
 
+        void Step();
     private:
         int row, col;
         int *rowPinList, *colPinList;
@@ -54,7 +55,7 @@ namespace keypad {
 
         MacroPlayer &macroPlayer;
 
-        uint handlerCnt = 0;
+        int handlerCnt = 0;
         KeyHandler **handlers = nullptr;
         KeyHandler *handler = nullptr;
 

@@ -7,6 +7,8 @@
 namespace backend {
     class Keyboard : keypad::KeyHandler {
     public:
+        Keyboard(unsigned int defaultLayer);
+
         void Begin();
         void End();
 

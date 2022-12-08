@@ -6,10 +6,10 @@
 namespace keypad {
     class LayeringState {
     public:
-        static const int MAX_LAYER_CNT = 32;
+        static const int MAX_LAYER_CNT = sizeof(unsigned long);
         static const int NO_LAYER = -1;
 
-        LayeringState(int layerCnt);
+        LayeringState();
 
         int SetLayerCnt(int cnt);
         int SetDefaultLayer(int layer);

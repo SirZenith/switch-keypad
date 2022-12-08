@@ -2,6 +2,9 @@
 
 // -----------------------------------------------------------------------------
 
+backend::SwitchController::SwitchController(unsigned int defaultLayer)
+    : KeyHandler(defaultLayer) {}
+
 void backend::SwitchController::Begin() {
     switch_controller::controller.Begin();
 }

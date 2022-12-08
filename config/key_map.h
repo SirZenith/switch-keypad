@@ -2,11 +2,20 @@
 
 #include "../src/common.h"
 #include "../src/keycode/common.h"
+
+#ifdef USE_SWITCH_CONTROLLER
 #include "../src/keycode/switch.h"
+#endif
+
+#ifdef USE_KEYBOARD
 #include "../src/keycode/keyboard.h"
+#endif
 
 namespace config {
     using keypad::Record;
+
+    unsigned int switchControllerDFL = 0;
+    unsigned int keyboardDFL = 0;
 
     const Record baseLayer[] = {
         // row1
@@ -41,9 +50,10 @@ namespace config {
         MACRO_PLAY_RECORDED,
     };
 
-    const Record *keyMap[sizeof(unsigned long)] = {
+    const Record *keyMap[] = {
         baseLayer,
         functionKeyLayer,
         macroLayer,
+        NULL,
     };
 }

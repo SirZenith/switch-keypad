@@ -3,13 +3,13 @@
 // -----------------------------------------------------------------------------
 
 keypad::KeyPad::KeyPad(
-    int row, int col, int layer,
+    int row, int col,
     int *rowPinList, int *colPinList,
     unsigned long debounce, unsigned long holdThreshold,
     const Record **keyMap,
     MacroPlayer &macroPlayer,
     KeyHandler **handlers
-) : row{row}, col{col}, layeringState{layer},
+) : row{row}, col{col},
     rowPinList{rowPinList}, colPinList{colPinList},
     debounce{debounce}, holdThreshold{holdThreshold},
     keyMap{keyMap},
@@ -27,9 +27,15 @@ keypad::KeyPad::KeyPad(
     }
 
     handlerCnt = 0;
-    for (KeyHandler *walk = handlers[0]; walk != nullptr; ++walk) {
+    for (const KeyHandler *walk = handlers[0]; walk != nullptr; ++walk) {
         ++handlerCnt;
     }
+
+    int layerCnt = 0;
+    for (const Record *walk = keyMap[0]; walk != nullptr; ++walk) {
+        ++layerCnt;
+    }
+    layeringState.SetLayerCnt(layerCnt);
 }
 
 keypad::KeyPad::~KeyPad() {
@@ -48,8 +54,9 @@ void keypad::KeyPad::SetLEDPin(int red, int orange, int yellow, int blue) {
     blueLEDPin = blue;
 }
 
-void keypad::KeyPad::SetHandler(uint index) {
+void keypad::KeyPad::SetHandler(int index) {
     handler = index < handlerCnt ? handlers[index] : handler;
+    layeringState.SetDefaultLayer(handler->DefaultLayer());
 }
 
 // -----------------------------------------------------------------------------
@@ -198,6 +205,18 @@ void keypad::KeyPad::UpdateLEDs() {
     UpdateLED(blueLEDPin, blueLEDState);
 
     lastLEDUpdateTime = now;
+}
+
+void keypad::KeyPad::Step() {
+    if (!Ready()) {
+        return;
+    }
+
+    Scan();
+    PlayMacro();
+
+    Send();
+    UpdateLEDs();
 }
 
 // -----------------------------------------------------------------------------

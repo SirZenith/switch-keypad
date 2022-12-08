@@ -1,6 +1,6 @@
 #include "LayeringState.h"
 
-keypad::LayeringState::LayeringState(int layerCnt) : layerCnt{layerCnt} {}
+keypad::LayeringState::LayeringState() : layerCnt{MAX_LAYER_CNT} {}
 
 int keypad::LayeringState::SetLayerCnt(int cnt) {
     if (cnt <= 0) {
@@ -15,14 +15,7 @@ int keypad::LayeringState::SetLayerCnt(int cnt) {
 }
 
 int keypad::LayeringState::SetDefaultLayer(int layer) {
-    if (layer <= 0) {
-        defaultLayer = 1;
-    } else if (layer > MAX_LAYER_CNT) {
-        defaultLayer = MAX_LAYER_CNT;
-    } else {
-        defaultLayer = layer;
-    }
-
+    defaultLayer = layer > 0 && layer < MAX_LAYER_CNT ? layer : defaultLayer;
     OperationLog("set-default", defaultLayer);
     return defaultLayer;
 }
