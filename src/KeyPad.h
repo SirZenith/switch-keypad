@@ -68,6 +68,8 @@ namespace keypad {
         int yellowLEDPin = NOT_A_PIN, yellowLEDState = LOW;
         int blueLEDPin = NOT_A_PIN, blueLEDState = LOW;
 
+        int builtInLEDState = HIGH;
+
         int changeHandlerLEDBlinkCnt = 0;
 
         void OperationLog(const char *msg, const MacroRecord *re = nullptr);

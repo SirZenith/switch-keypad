@@ -70,11 +70,19 @@ void keypad::MacroPlayer::ToggleIndex(int index, int r, int c) {
     curPlaying = nullptr;
 }
 
-void keypad::MacroPlayer::ToggleMacro(const MacroRecord *macro, int r, int c) {
+void keypad::MacroPlayer::ToggleMacro(const MacroRecord *m, int r, int c) {
     row = r;
     col = c;
-    macro = !CheckHasMacroBinded() ? macro : nullptr;
+    macro = !CheckHasMacroBinded() ? m : nullptr;
     curPlaying = nullptr;
+
+    if (macro != nullptr) {
+        int cnt = 0;
+        for (; m[cnt].type != Operation::END; ++cnt) {}
+        Serial.print("record length: ");
+        Serial.print(cnt);
+        Serial.print("\n");
+    }
 }
 
 const keypad::MacroRecord *keypad::MacroPlayer::Next() {

@@ -18,7 +18,7 @@ namespace config {
     int colPinList[] = {4, 3, 2, keypad::NOT_A_PIN};
 
     // debounce threshold for switch, in microsecond.
-    const unsigned long debounce = 600UL;
+    const unsigned long debounce = 700UL;
     // when a key press last longer then this amount of time, hold mapping for
     // this key will be triggered if exists, in microsecond.
     const unsigned long holdThreshold = 500UL * 1000UL;
@@ -28,8 +28,8 @@ namespace config {
     // how long should keypad idle after an CL command key release, in millisecond.
     const unsigned long clickEndDelay = 80UL;
 
-    int ledRedPin = 0;
-    int ledOrnagePin = 0;
-    int ledYellowPin = 0;
-    int ledBluePin = 0;
+    int ledRedPin = 10;
+    int ledOrnagePin = 9;
+    int ledYellowPin = 8;
+    int ledBluePin = 7;
 }

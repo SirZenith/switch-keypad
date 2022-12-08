@@ -14,8 +14,10 @@ keypad::KeyPad::KeyPad(
     macroPlayer{macroPlayer},
     handlers{handlers} {
 
-    for (row = 0; rowPinList[row] != NOT_A_PIN; ++row) {}
-    for (col = 0; colPinList[col] != NOT_A_PIN; ++col) {}
+    for (row = 0; rowPinList[row] != NOT_A_PIN; ++row) {
+    }
+    for (col = 0; colPinList[col] != NOT_A_PIN; ++col) {
+    }
 
     keyMatrix = new Key *[row];
     for (int r = 0; r < row; ++r) {
@@ -27,10 +29,12 @@ keypad::KeyPad::KeyPad(
         }
     }
 
-    for (handlerCnt = 0; handlers[handlerCnt] != nullptr; ++handlerCnt) { }
+    for (handlerCnt = 0; handlers[handlerCnt] != nullptr; ++handlerCnt) {
+    }
 
     int layerCnt = 0;
-    for (; keyMap[layerCnt] != nullptr; ++layerCnt) { }
+    for (; keyMap[layerCnt] != nullptr; ++layerCnt) {
+    }
     layeringState.SetLayerCnt(layerCnt);
 }
 
@@ -76,6 +80,11 @@ void keypad::KeyPad::SetLEDPin(int red, int orange, int yellow, int blue) {
     orangeLEDPin = orange;
     yellowLEDPin = yellow;
     blueLEDPin = blue;
+
+    digitalWrite(red, LOW);
+    digitalWrite(orange, LOW);
+    digitalWrite(yellow, LOW);
+    digitalWrite(blue, LOW);
 }
 
 void keypad::KeyPad::SetHandler(int index) {
@@ -112,12 +121,10 @@ void keypad::KeyPad::Scan() {
     for (int c = 0; c < col; ++c) {
         digitalWrite(colPinList[c], LOW);
 
-
         for (int r = 0; r < row; ++r) {
             if (!DebounceCheck(r, c, now)) {
                 // pass
-            } else
-            if (CheckIsActive(r)) {
+            } else if (CheckIsActive(r)) {
                 OnKeyActive(r, c, now);
             } else {
                 OnKeyInactive(r, c, now);
@@ -187,7 +194,6 @@ void keypad::KeyPad::PlayMacro() {
 }
 
 void keypad::KeyPad::UpdateLEDs() {
-#ifdef USE_LED
     unsigned long now = millis();
     unsigned long deltaTime = now > lastLEDUpdateTime
                                   ? now - lastLEDUpdateTime
@@ -197,6 +203,7 @@ void keypad::KeyPad::UpdateLEDs() {
         return;
     }
 
+#ifdef USE_LED
     // -------------------------------------------------------------------------
     // Red
     if (recorder.IsRecording()) {
@@ -253,9 +260,52 @@ void keypad::KeyPad::UpdateLEDs() {
         }
     }
     UpdateLED(blueLEDPin, blueLEDState);
+#else
+    if (recorder.IsRecording()) {
+        // recording macro
+        unsigned int spareSpace = recorder.SpareSpace();
+        unsigned int capacity = recorder.Capacity();
+        float percentage = float(spareSpace) / float(capacity);
+
+        if (percentage > 0.5) {
+            builtInLEDState  = LOW;
+        } else if (percentage > 0) {
+            unsigned long gap = ULONG_MAX;
+            if (percentage > 0.25) {
+                gap = BLINK_TIME;
+            } else if (percentage > 0.125) {
+                gap = FAST_BLINK_TIME;
+            } else if (percentage > 0) {
+                gap = SUPER_FAST_BLINK_TIME;
+            }
+
+            if (deltaTime > gap) {
+                builtInLEDState = !builtInLEDState;
+            }
+        } else {
+            builtInLEDState = HIGH;
+        }
+    } else if (changeHandlerLEDBlinkCnt > 0) {
+        builtInLEDState = !builtInLEDState;
+        if (!orangeLEDState) {
+            --changeHandlerLEDBlinkCnt;
+        }
+    } else if (handler->Dirty()) {
+        // normal state
+        builtInLEDState = LOW;
+    } else if (macroPlayer.CheckIsMacroPlaying()) {
+        // playing macro
+        if (deltaTime > BLINK_TIME) {
+            builtInLEDState = !builtInLEDState;
+        }
+    } else {
+        builtInLEDState = HIGH;
+    }
+
+    digitalWrite(LED_BUILTIN, builtInLEDState);
+#endif
 
     lastLEDUpdateTime = now;
-#endif
 }
 
 void keypad::KeyPad::Step() {
@@ -265,9 +315,9 @@ void keypad::KeyPad::Step() {
 
     Scan();
     PlayMacro();
+    UpdateLEDs();
 
     Send();
-    UpdateLEDs();
 }
 
 // -----------------------------------------------------------------------------

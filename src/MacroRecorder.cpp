@@ -2,10 +2,12 @@
 
 keypad::MacroRecorder::MacroRecorder() {
     records = new MacroRecord[capacity];
+    Clear();
 }
 
 keypad::MacroRecorder::MacroRecorder(unsigned cap) : capacity{cap} {
     records = cap > 0 ? new MacroRecord[cap] : nullptr;
+    Clear();
 }
 
 keypad::MacroRecorder::~MacroRecorder() {
@@ -54,6 +56,8 @@ void keypad::MacroRecorder::EndRecording(bool isLoop) {
         target.param = (unsigned long)isLoop;
         ++size;
     }
+
+    isRecording = false;
 }
 
 // ----------------------------------------------------------------------------
@@ -94,13 +98,16 @@ const keypad::MacroRecord *keypad::MacroRecorder::GetMacro() {
 // ----------------------------------------------------------------------------
 
 void keypad::MacroRecorder::Push(Operation type, unsigned long param) {
-    MacroRecord &target = records[size];
-    target.type = type;
-    target.param = param;
-    ++size;
-
+    Serial.print("save into: ");
+    Serial.print(size);
+    Serial.print(", ");
     Serial.print(GetOperatioinName(type));
     Serial.print(" - ");
     Serial.print(param);
     Serial.print("\n");
+
+    MacroRecord &target = records[size];
+    target.type = type;
+    target.param = param;
+    ++size;
 }
