@@ -3,18 +3,19 @@
 // -----------------------------------------------------------------------------
 
 keypad::KeyPad::KeyPad(
-    int row, int col,
     int *rowPinList, int *colPinList,
     unsigned long debounce, unsigned long holdThreshold,
     const Record **keyMap,
     MacroPlayer &macroPlayer,
     KeyHandler **handlers
-) : row{row}, col{col},
-    rowPinList{rowPinList}, colPinList{colPinList},
+) : rowPinList{rowPinList}, colPinList{colPinList},
     debounce{debounce}, holdThreshold{holdThreshold},
     keyMap{keyMap},
     macroPlayer{macroPlayer},
     handlers{handlers} {
+
+    for (row = 0; rowPinList[row] != NOT_A_PIN; ++row) {}
+    for (col = 0; colPinList[col] != NOT_A_PIN; ++col) {}
 
     keyMatrix = new Key *[row];
     for (int r = 0; r < row; ++r) {
@@ -26,15 +27,10 @@ keypad::KeyPad::KeyPad(
         }
     }
 
-    handlerCnt = 0;
-    for (const KeyHandler *walk = handlers[0]; walk != nullptr; ++walk) {
-        ++handlerCnt;
-    }
+    for (handlerCnt = 0; handlers[handlerCnt] != nullptr; ++handlerCnt) { }
 
     int layerCnt = 0;
-    for (const Record *walk = keyMap[0]; walk != nullptr; ++walk) {
-        ++layerCnt;
-    }
+    for (; keyMap[layerCnt] != nullptr; ++layerCnt) { }
     layeringState.SetLayerCnt(layerCnt);
 }
 
@@ -43,6 +39,34 @@ keypad::KeyPad::~KeyPad() {
         delete[] keyMatrix[r];
     }
     delete[] keyMatrix;
+}
+
+// -----------------------------------------------------------------------------
+
+void keypad::KeyPad::LogState() {
+#ifdef DEBUG
+    Serial.println("---------- State Log ----------");
+
+    Serial.print("row: ");
+    Serial.print(row);
+    Serial.print("\n");
+
+    Serial.print("col: ");
+    Serial.print(col);
+    Serial.print("\n");
+
+    Serial.print("layers: ");
+    Serial.print(layeringState.GetLayerCnt());
+    Serial.print("\n");
+
+    Serial.print("handlers: ");
+    Serial.print(handlerCnt);
+    // Serial.print(", ");
+    // Serial.print(handler == nullptr);
+    Serial.print("\n");
+
+    Serial.println("-------------------------------");
+#endif
 }
 
 // -----------------------------------------------------------------------------
@@ -56,8 +80,10 @@ void keypad::KeyPad::SetLEDPin(int red, int orange, int yellow, int blue) {
 
 void keypad::KeyPad::SetHandler(int index) {
     handler = index < handlerCnt ? handlers[index] : handler;
-    layeringState.SetDefaultLayer(handler->DefaultLayer());
-    changeHandlerLEDBlinkCnt = CHANGE_HANDLER_LED_BLINK_CNT;
+    if (handler != nullptr) {
+        layeringState.SetDefaultLayer(handler->DefaultLayer());
+        changeHandlerLEDBlinkCnt = CHANGE_HANDLER_LED_BLINK_CNT;
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -83,20 +109,22 @@ void keypad::KeyPad::Scan() {
 
     unsigned long now = micros();
 
-    for (int r = 0; r < row; ++r) {
-        digitalWrite(rowPinList[r], LOW);
+    for (int c = 0; c < col; ++c) {
+        digitalWrite(colPinList[c], LOW);
 
-        for (int c = 0; c < col; ++c) {
+
+        for (int r = 0; r < row; ++r) {
             if (!DebounceCheck(r, c, now)) {
                 // pass
-            } else if (CheckIsActive(c)) {
+            } else
+            if (CheckIsActive(r)) {
                 OnKeyActive(r, c, now);
             } else {
                 OnKeyInactive(r, c, now);
             }
         }
 
-        digitalWrite(rowPinList[r], HIGH);
+        digitalWrite(colPinList[c], HIGH);
     }
 }
 
@@ -116,7 +144,7 @@ void keypad::KeyPad::PlayMacro() {
         return;
     }
 
-    const MacroRecord *re = macroPlayer.GetMacro();
+    const MacroRecord *re = macroPlayer.Next();
 
     OperationLog(nullptr, re);
 
@@ -132,7 +160,7 @@ void keypad::KeyPad::PlayMacro() {
         break;
     // -------------------------------------------------------------------------
     case Operation::END:
-        if (re->param) {
+        if (!re->param) {
             macroPlayer.Unbind();
         }
         break;
@@ -163,7 +191,7 @@ void keypad::KeyPad::UpdateLEDs() {
     unsigned long now = millis();
     unsigned long deltaTime = now > lastLEDUpdateTime
                                   ? now - lastLEDUpdateTime
-                                  : ULONG_LONG_MAX - lastLEDUpdateTime + now;
+                                  : ULONG_MAX - lastLEDUpdateTime + now;
 
     if (deltaTime < MIN_LED_UPDATE_STEP) {
         return;
@@ -251,7 +279,7 @@ void keypad::KeyPad::OperationLog(const char *msg, const MacroRecord *re) {
 }
 
 void keypad::KeyPad::UpdateLED(int pin, int value) {
-    if (pin == NO_LED_PIN) {
+    if (pin == NOT_A_PIN) {
         return;
     }
 
@@ -269,10 +297,10 @@ bool keypad::KeyPad::DebounceCheck(int r, int c, unsigned long now) {
     return duration >= debounce;
 }
 
-bool keypad::KeyPad::CheckIsActive(int c) {
-    int colPin = colPinList[c];
+bool keypad::KeyPad::CheckIsActive(int r) {
+    int rowPin = rowPinList[r];
 
-    bool isActive = digitalRead(colPin) == LOW;
+    bool isActive = digitalRead(rowPin) == LOW;
 
     return isActive;
 }
@@ -281,9 +309,9 @@ bool keypad::KeyPad::CheckIsActive(int r, int c) {
     int rowPin = rowPinList[r];
     int colPin = colPinList[c];
 
-    digitalWrite(rowPin, LOW);
-    bool isActive = digitalRead(colPin) == LOW;
-    digitalWrite(rowPin, HIGH);
+    digitalWrite(colPin, LOW);
+    bool isActive = digitalRead(rowPin) == LOW;
+    digitalWrite(colPin, HIGH);
 
     return isActive;
 }
@@ -392,7 +420,7 @@ void keypad::KeyPad::OnKeyReleased(int r, int c) {
 void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int layer) {
     switch (re.type) {
     case Operation::MACRO:
-        macroPlayer.isPlaying = false;
+        macroPlayer.isAllowedToPlay = false;
         macroPlayer.ToggleIndex(re.param, r, c);
         break;
     case Operation::MACRO_RECORD:
@@ -402,7 +430,7 @@ void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int laye
         recorder.ToggleRecording(true);
         break;
     case Operation::MACRO_PLAY_RECORDED:
-        macroPlayer.isPlaying = false;
+        macroPlayer.isAllowedToPlay = false;
         macroPlayer.ToggleMacro(recorder.GetMacro(), r, c);
         break;
     // -------------------------------------------------------------------------
@@ -444,7 +472,7 @@ void keypad::KeyPad::DoKeyRelease(Key &key, const Record &re, int r, int c, int 
     switch (re.type) {
     case Operation::MACRO:
     case Operation::MACRO_PLAY_RECORDED:
-        macroPlayer.isPlaying = true;
+        macroPlayer.isAllowedToPlay = true;
         break;
     // -------------------------------------------------------------------------
     case Operation::MOMENT_LAYER:

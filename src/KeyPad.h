@@ -11,14 +11,12 @@
 namespace keypad {
     class KeyPad {
     public:
-        static const int NO_LED_PIN = -1;
         static const unsigned long MIN_LED_UPDATE_STEP = 100;
         static const unsigned long BLINK_TIME = 1000;
         static const unsigned long FAST_BLINK_TIME = 500;
         static const unsigned long SUPER_FAST_BLINK_TIME = 250;
 
         KeyPad(
-            int row, int col,
             int *rowPinList, int *colPinList,
             unsigned long debounce, unsigned long holdThreshold,
 
@@ -27,6 +25,8 @@ namespace keypad {
             KeyHandler **handlers
         );
         ~KeyPad();
+
+        void LogState();
 
         void SetLEDPin(int red, int orange, int yellow, int blue);
         void SetHandler(int index);
@@ -63,10 +63,10 @@ namespace keypad {
 
         unsigned long lastLEDUpdateTime = 0;
 
-        int redLEDPin = NO_LED_PIN, redLEDState = LOW;
-        int orangeLEDPin = NO_LED_PIN, orangeLEDState = LOW;
-        int yellowLEDPin = NO_LED_PIN, yellowLEDState = LOW;
-        int blueLEDPin = NO_LED_PIN, blueLEDState = LOW;
+        int redLEDPin = NOT_A_PIN, redLEDState = LOW;
+        int orangeLEDPin = NOT_A_PIN, orangeLEDState = LOW;
+        int yellowLEDPin = NOT_A_PIN, yellowLEDState = LOW;
+        int blueLEDPin = NOT_A_PIN, blueLEDState = LOW;
 
         int changeHandlerLEDBlinkCnt = 0;
 

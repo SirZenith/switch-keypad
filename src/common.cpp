@@ -21,6 +21,15 @@ const char *keypad::GetOperatioinName(Operation type) {
     case Operation::MACRO:
         name = "macro";
         break;
+    case Operation::MACRO_RECORD:
+        name = "record";
+        break;
+    case Operation::MACRO_RECORD_LOOP:
+        name = "record-loop";
+        break;
+    case Operation::MACRO_PLAY_RECORDED:
+        name = "play-recorded";
+        break;
     case Operation::END:
         name = "end";
         break;

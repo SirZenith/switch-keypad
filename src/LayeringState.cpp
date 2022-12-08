@@ -2,6 +2,10 @@
 
 keypad::LayeringState::LayeringState() : layerCnt{MAX_LAYER_CNT} {}
 
+int keypad::LayeringState::GetLayerCnt() {
+    return layerCnt;
+}
+
 int keypad::LayeringState::SetLayerCnt(int cnt) {
     if (cnt <= 0) {
         layerCnt = 1;
@@ -31,8 +35,6 @@ bool keypad::LayeringState::IsInOneShotState() {
 // ----------------------------------------------------------------------------
 
 void keypad::LayeringState::ActivateLayer(int layer) {
-    OperationLog("goto", layer);
-
     unsigned long mask = 1UL << layer;
     if (!(layerStateRecord & mask)) {
         layerStateRecord |= mask;
@@ -79,7 +81,6 @@ void keypad::LayeringState::OneShotLayerOff() {
 
 void keypad::LayeringState::OperationLog(const char *msg, unsigned long param) {
 #ifdef DEBUG
-    Serial.print("[layering]: ");
     Serial.print(msg);
     if (param != NO_LAYER) {
         Serial.print("(");

@@ -78,5 +78,6 @@ namespace config {
     const MacroRecord *macroList[] = {
         macroItemCopy,
         macroSendToBoxBugTrigger,
+        NULL,
     };
 }

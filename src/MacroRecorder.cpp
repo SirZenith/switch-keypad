@@ -98,4 +98,9 @@ void keypad::MacroRecorder::Push(Operation type, unsigned long param) {
     target.type = type;
     target.param = param;
     ++size;
+
+    Serial.print(GetOperatioinName(type));
+    Serial.print(" - ");
+    Serial.print(param);
+    Serial.print("\n");
 }

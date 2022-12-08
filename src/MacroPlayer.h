@@ -5,7 +5,7 @@
 namespace keypad {
     class MacroPlayer {
     public:
-        bool isPlaying = false;
+        bool isAllowedToPlay = false;
         // when macro is triggered, coordinate of trigger key will be recorded.
         int row = 0, col = 0;
 
@@ -32,6 +32,8 @@ namespace keypad {
         const MacroRecord **macroList = nullptr;
         const MacroRecord *macro = nullptr;
         const MacroRecord *curPlaying = nullptr;
+
+        int macroCnt = 0;
 
         unsigned long clickDelay = 0;
         unsigned long clickEndDelay = 0;

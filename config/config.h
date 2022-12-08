@@ -3,8 +3,8 @@
 // -----------------------------------------------------------------------------
 
 #define USE_SWITCH_CONTROLLER 1
-#define USE_KEYBOARD 1
-#define USE_LED 1
+// #define USE_KEYBOARD 1
+// #define USE_LED 1
 
 // -----------------------------------------------------------------------------
 
@@ -14,10 +14,8 @@
 #include "handlers.h"
 
 namespace config {
-    const int row = 2;
-    const int col = 3;
-    int rowPinList[] = {1, 0};
-    int colPinList[] = {2, 3, 4};
+    int rowPinList[] = {0, 1, keypad::NOT_A_PIN};
+    int colPinList[] = {4, 3, 2, keypad::NOT_A_PIN};
 
     // debounce threshold for switch, in microsecond.
     const unsigned long debounce = 600UL;

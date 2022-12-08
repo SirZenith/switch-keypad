@@ -5,7 +5,11 @@ keypad::MacroPlayer::MacroPlayer(
     unsigned long clickDelay, unsigned long clickEndDelay
 ) : macroList{macroList},
     clickDelay{clickDelay},
-    clickEndDelay{clickEndDelay} {}
+    clickEndDelay{clickEndDelay} {
+
+    for (macroCnt = 0; macroList[macroCnt] != nullptr; ++macroCnt) {
+    }
+}
 
 // ----------------------------------------------------------------------------
 
@@ -30,9 +34,9 @@ bool keypad::MacroPlayer::CheckIsIdle() {
 
     unsigned long now = millis();
     if (now < idleStartTime) {
-        isIdle = delay < (ULONG_MAX - idleStartTime + now);
+        isIdle = delay > (ULONG_MAX - idleStartTime + now);
     } else {
-        isIdle = delay < now - idleStartTime;
+        isIdle = delay > now - idleStartTime;
     }
 
     return isIdle;
@@ -49,7 +53,7 @@ const keypad::MacroRecord *keypad::MacroPlayer::GetMacro() {
 }
 
 bool keypad::MacroPlayer::CheckIsMacroPlaying() {
-    return isPlaying && CheckHasMacroBinded();
+    return isAllowedToPlay && CheckHasMacroBinded();
 }
 
 void keypad::MacroPlayer::Unbind() {
@@ -58,17 +62,18 @@ void keypad::MacroPlayer::Unbind() {
 }
 
 void keypad::MacroPlayer::ToggleIndex(int index, int r, int c) {
-    // TODO: index range check
     row = r;
     col = c;
-    macro = CheckHasMacroBinded() ? macroList[index] : nullptr;
+    macro = !CheckHasMacroBinded() && index < macroCnt
+                ? macroList[index]
+                : nullptr;
     curPlaying = nullptr;
 }
 
 void keypad::MacroPlayer::ToggleMacro(const MacroRecord *macro, int r, int c) {
     row = r;
     col = c;
-    macro = CheckHasMacroBinded() ? macro : nullptr;
+    macro = !CheckHasMacroBinded() ? macro : nullptr;
     curPlaying = nullptr;
 }
 

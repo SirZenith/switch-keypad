@@ -3,6 +3,8 @@
 #include <Arduino.h>
 
 namespace keypad {
+    static const int NOT_A_PIN = -1;
+
     enum class Operation : uint8_t {
         EMPTY,
         // --------------------------------------------------------------------

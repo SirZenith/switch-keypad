@@ -6,7 +6,6 @@
 auto macroPlayer = keypad::MacroPlayer(config::macroList, config::clickDelay, config::clickEndDelay);
 
 auto pad = keypad::KeyPad(
-    config::row, config::col,
     config::rowPinList, config::colPinList,
     config::debounce, config::holdThreshold,
     config::keyMap,
@@ -19,9 +18,15 @@ void setup() {
     Serial.begin(115200);
 #endif
 
-    pad.Begin();
     pad.SetHandler(0);
+    pad.Begin();
+
 #ifdef USE_LED
+    pinMode(config::ledRedPin, OUTPUT);
+    pinMode(config::ledOrnagePin, OUTPUT);
+    pinMode(config::ledYellowPin, OUTPUT);
+    pinMode(config::ledBluePin, OUTPUT);
+
     pad.SetLEDPin(
         config::ledRedPin,
         config::ledOrnagePin,
@@ -30,15 +35,13 @@ void setup() {
     );
 #endif
 
-    for (int r = 0; r < config::row; ++r) {
-        int rowPin = config::rowPinList[r];
-        pinMode(rowPin, OUTPUT);
-        digitalWrite(rowPin, HIGH);
+    for (int *pin = config::rowPinList; *pin != keypad::NOT_A_PIN; ++pin) {
+        pinMode(*pin, INPUT_PULLUP);
     }
 
-    for (int c = 0; c < config::col; ++c) {
-        int colPin = config::colPinList[c];
-        pinMode(colPin, INPUT_PULLUP);
+    for (int *pin = config::colPinList; *pin != keypad::NOT_A_PIN; ++pin) {
+        pinMode(*pin, OUTPUT);
+        digitalWrite(*pin, HIGH);
     }
 
     while (!USBDevice.mounted()) {
