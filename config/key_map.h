@@ -41,7 +41,7 @@ namespace config {
         MACRO_PLAY_RECORDED,
     };
 
-    const Record *keyMap[] = {
+    const Record *keyMap[sizeof(unsigned long)] = {
         baseLayer,
         functionKeyLayer,
         macroLayer,

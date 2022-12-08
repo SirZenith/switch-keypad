@@ -166,7 +166,7 @@ void keypad::KeyPad::UpdateLEDs() {
 
         if (percentage > 0.5) {
             redLEDPin = HIGH;
-        } else {
+        } else if (percentage > 0) {
             unsigned long gap = ULONG_MAX;
             if (percentage > 0.25) {
                 gap = BLINK_TIME;
@@ -179,6 +179,8 @@ void keypad::KeyPad::UpdateLEDs() {
             if (deltaTime > gap) {
                 redLEDState = !redLEDState;
             }
+        } else {
+            redLEDState = LOW;
         }
     } else if (macroPlayer.CheckIsMacroPlaying()) {
         // playing macro
