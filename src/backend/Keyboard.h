@@ -21,6 +21,5 @@ namespace backend {
         void OperationLog(const char *msg, const keypad::MacroRecord *re);
     private:
         bool isDirty = false;
-        TinyKeyboard_ keyboard;
     };
 }

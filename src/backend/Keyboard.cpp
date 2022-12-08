@@ -3,11 +3,11 @@
 // -----------------------------------------------------------------------------
 
 void backend::Keyboard::Begin() {
-    keyboard.begin();
+    ::Keyboard.begin();
 }
 
 void backend::Keyboard::End() {
-    keyboard.end();
+    ::Keyboard.end();
 }
 
 bool backend::Keyboard::Ready() {
@@ -27,12 +27,12 @@ void backend::Keyboard::Send() {
 // -----------------------------------------------------------------------------
 
 void backend::Keyboard::Press(unsigned long param) {
-    keyboard.press(param);
+    ::Keyboard.press(param);
     isDirty = true;
 }
 
 void backend::Keyboard::Release(unsigned long param) {
-    keyboard.release(param);
+    ::Keyboard.release(param);
     isDirty = true;
 }
 
