@@ -54,22 +54,4 @@ namespace keypad {
 
         void SetOnHold(MacroRecord r);
     };
-
-    struct Key {
-        enum State {
-            TRIGGERED,
-            PRESSED,
-            HELD,
-            RELEASED,
-        };
-
-        State state = State::RELEASED;
-        unsigned long updatetime = 0;
-        bool isHoldTriggered = false;
-        // if layer will change after this key is pressed
-        // then we should remember on which layer we pressed this key on,
-        // so that we can release it on the same layer,
-        // but not releasing another key code on changed layer.
-        int layer;
-    };
 }

@@ -97,6 +97,7 @@ void keypad::KeyPad::SetHandler(int index) {
 
     if (handler != nullptr) {
         handler->End();
+        handler->ReleaseAll();
     }
 
     handler = newHandler;
@@ -105,6 +106,9 @@ void keypad::KeyPad::SetHandler(int index) {
     layeringState.Reset();
     layeringState.SetDefaultLayer(handler->DefaultLayer());
     layeringState.SetLayerCnt(handler->LayerCnt());
+
+    recorder.EndRecording(false);
+    recorder.Clear();
 
     macroPlayer.Unbind();
 
@@ -242,6 +246,8 @@ void keypad::KeyPad::Step() {
     if (!Ready()) {
         return;
     }
+
+    // LogState();
 
     Scan();
     PlayMacro();
@@ -480,6 +486,9 @@ void keypad::KeyPad::OnKeyPressed(int r, int c) {
                     : layeringState.GetCurLayer();
     const Record &re = handler->GetRecord(layer, r * col + c);
 
+    key.layer = layer;
+    key.usedHandler = handler;
+
     if (layeringState.IsInOneShotState()) {
         layeringState.OneShotLayerOff();
     }
@@ -492,6 +501,11 @@ void keypad::KeyPad::OnKeyPressed(int r, int c) {
 
 void keypad::KeyPad::OnKeyHeld(int r, int c) {
     Key &key = keyMatrix[r][c];
+
+    if (key.usedHandler != handler) {
+        return;
+    }
+
     int layer = key.layer != LayeringState::NO_LAYER
                     ? key.layer
                     : layeringState.GetCurLayer();
@@ -506,10 +520,17 @@ void keypad::KeyPad::OnKeyHeld(int r, int c) {
 
 void keypad::KeyPad::OnKeyReleased(int r, int c) {
     Key &key = keyMatrix[r][c];
+
+    if (key.usedHandler != handler) {
+        return;
+    }
+
     int layer = key.layer != LayeringState::NO_LAYER
                     ? key.layer
                     : layeringState.GetCurLayer();
     const Record &re = handler->GetRecord(layer, r * col + c);
+
+    key.layer = LayeringState::NO_LAYER;
 
     if (re.onHold == nullptr) {
         DoKeyRelease(key, re, r, c, layer);
@@ -545,15 +566,12 @@ void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int laye
         break;
     // -------------------------------------------------------------------------
     case Operation::MOMENT_LAYER:
-        key.layer = layer;
         layeringState.ActivateLayer(re.param);
         break;
     case Operation::ONE_SHOT_LAYER:
-        key.layer = layer;
         layeringState.OneShotLayerOn(re.param);
         break;
     case Operation::TOGGLE_LAYER:
-        key.layer = layer;
         layeringState.ToggleLayer(re.param);
         break;
     case Operation::DEFAULT_LAYER:
@@ -586,14 +604,11 @@ void keypad::KeyPad::DoKeyRelease(Key &key, const Record &re, int r, int c, int 
         break;
     // -------------------------------------------------------------------------
     case Operation::MOMENT_LAYER:
-        key.layer = LayeringState::NO_LAYER;
         layeringState.DeactivateLayer(re.param);
         break;
     case Operation::ONE_SHOT_LAYER:
-        key.layer = LayeringState::NO_LAYER;
         break;
     case Operation::TOGGLE_LAYER:
-        key.layer = LayeringState::NO_LAYER;
         break;
     case Operation::DEFAULT_LAYER:
         break;
