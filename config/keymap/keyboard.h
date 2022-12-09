@@ -10,18 +10,18 @@ namespace config::keyboard {
     const unsigned int defaultLayer = 0;
 
     const Record arrowKeyLayer[] = {
-        // row1
-        ML(1),
-        PR_KEY_UP_ARROW,
-        HANDLER(0),
-        // row2
-        PR_KEY_LEFT_ARROW,
-        PR_KEY_DOWN_ARROW,
-        PR_KEY_RIGHT_ARROW,
+        ML(1)            , PR_KEY_UP_ARROW  , HANDLER(0)        ,
+        PR_KEY_LEFT_ARROW, PR_KEY_DOWN_ARROW, PR_KEY_RIGHT_ARROW,
+    };
+
+    const Record letterLayer[] = {
+        EMPTY   , PR_KEY_E, PR_KEY_R,
+        PR_KEY_S, PR_KEY_D, PR_KEY_F,
     };
 
     const Record *keymap[] = {
         arrowKeyLayer,
+        letterLayer,
         NULL,
     };
 }
