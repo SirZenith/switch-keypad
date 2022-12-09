@@ -11,10 +11,11 @@
 namespace keypad {
     class KeyPad {
     public:
-        static const unsigned long MIN_LED_UPDATE_STEP = 100;
-        static const unsigned long BLINK_TIME = 1000;
-        static const unsigned long FAST_BLINK_TIME = 500;
-        static const unsigned long SUPER_FAST_BLINK_TIME = 250;
+        static const unsigned long MIN_LED_UPDATE_STEP = 50;
+        static const unsigned long SLOW_BLINK_TIME = 1000;
+        static const unsigned long NORMAL_BLINK_TIME = 500;
+        static const unsigned long FAST_BLINK_TIME = 150;
+        static const unsigned long SUPER_FAST_BLINK_TIME = 50;
 
         KeyPad(
             int *rowPinList, int *colPinList,
@@ -70,6 +71,8 @@ namespace keypad {
 
         void OperationLog(const char *msg, const MacroRecord *re = nullptr);
         void UpdateLED(int pin, int value);
+        bool UpdateExternalLED(unsigned long deltaTime);
+        bool UpdateBuiltInLED(unsigned long deltaTime);
 
         bool DebounceCheck(int r, int c, unsigned long now);
         bool CheckIsActive(int c);

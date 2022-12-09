@@ -169,7 +169,7 @@ void keypad::KeyPad::PlayMacro() {
 
     const MacroRecord *re = macroPlayer.Next();
 
-    OperationLog(nullptr, re);
+    bool needLog = true;
 
     switch (re->type) {
     case Operation::DELAY:
@@ -192,6 +192,7 @@ void keypad::KeyPad::PlayMacro() {
         handler->Press(re->param);
         break;
     case Operation::RELEASE:
+        needLog = false;
         handler->Release(re->param);
         break;
     case Operation::CLICK:
@@ -199,19 +200,25 @@ void keypad::KeyPad::PlayMacro() {
             handler->Press(re->param);
             macroPlayer.ClickDelay();
         } else {
+            needLog = false;
             handler->Release(re->param);
             macroPlayer.ClickEndDelay();
         }
         break;
 
     default:
+        needLog = false;
         break;
+    }
+
+    if (needLog) {
+        OperationLog(nullptr, re);
     }
 }
 
 void keypad::KeyPad::UpdateLEDs() {
     unsigned long now = millis();
-    unsigned long deltaTime = now > lastLEDUpdateTime
+    unsigned long deltaTime = now >= lastLEDUpdateTime
                                   ? now - lastLEDUpdateTime
                                   : ULONG_MAX - lastLEDUpdateTime + now;
 
@@ -219,109 +226,16 @@ void keypad::KeyPad::UpdateLEDs() {
         return;
     }
 
+    bool isUpdated = false;
 #ifdef USE_LED
-    // -------------------------------------------------------------------------
-    // Red
-    if (recorder.IsRecording()) {
-        // recording macro
-        unsigned int spareSpace = recorder.SpareSpace();
-        unsigned int capacity = recorder.Capacity();
-        float percentage = float(spareSpace) / float(capacity);
-
-        if (percentage > 0.5) {
-            redLEDPin = HIGH;
-        } else if (percentage > 0) {
-            unsigned long gap = ULONG_MAX;
-            if (percentage > 0.25) {
-                gap = BLINK_TIME;
-            } else if (percentage > 0.125) {
-                gap = FAST_BLINK_TIME;
-            } else if (percentage > 0) {
-                gap = SUPER_FAST_BLINK_TIME;
-            }
-
-            if (deltaTime > gap) {
-                redLEDState = !redLEDState;
-            }
-        } else {
-            redLEDState = LOW;
-        }
-    }
-    UpdateLED(redLEDPin, redLEDState);
-
-    // -------------------------------------------------------------------------
-    // Orange
-    if (changeHandlerLEDBlinkCnt > 0) {
-        orangeLEDState = !orangeLEDState;
-        if (!orangeLEDState) {
-            --changeHandlerLEDBlinkCnt;
-        }
-    }
-    UpdateLED(orangeLEDPin, orangeLEDState);
-
-    // -------------------------------------------------------------------------
-    // Yellow
-    if (handler->Dirty()) {
-        // normal state
-        yellowLEDState = HIGH;
-    }
-    UpdateLED(yellowLEDPin, yellowLEDState);
-
-    // -------------------------------------------------------------------------
-    // Blue
-    if (macroPlayer.CheckIsMacroPlaying()) {
-        // playing macro
-        if (deltaTime > BLINK_TIME) {
-            blueLEDState = !blueLEDState;
-        }
-    }
-    UpdateLED(blueLEDPin, blueLEDState);
+    isUpdated = UpdateExternalLED(deltaTime);
 #else
-    if (recorder.IsRecording()) {
-        // recording macro
-        unsigned int spareSpace = recorder.SpareSpace();
-        unsigned int capacity = recorder.Capacity();
-        float percentage = float(spareSpace) / float(capacity);
-
-        if (percentage > 0.5) {
-            builtInLEDState = LOW;
-        } else if (percentage > 0) {
-            unsigned long gap = ULONG_MAX;
-            if (percentage > 0.25) {
-                gap = BLINK_TIME;
-            } else if (percentage > 0.125) {
-                gap = FAST_BLINK_TIME;
-            } else if (percentage > 0) {
-                gap = SUPER_FAST_BLINK_TIME;
-            }
-
-            if (deltaTime > gap) {
-                builtInLEDState = !builtInLEDState;
-            }
-        } else {
-            builtInLEDState = HIGH;
-        }
-    } else if (changeHandlerLEDBlinkCnt > 0) {
-        builtInLEDState = !builtInLEDState;
-        if (!orangeLEDState) {
-            --changeHandlerLEDBlinkCnt;
-        }
-    } else if (handler->Dirty()) {
-        // normal state
-        builtInLEDState = LOW;
-    } else if (macroPlayer.CheckIsMacroPlaying()) {
-        // playing macro
-        if (deltaTime > BLINK_TIME) {
-            builtInLEDState = !builtInLEDState;
-        }
-    } else {
-        builtInLEDState = HIGH;
-    }
-
-    digitalWrite(LED_BUILTIN, builtInLEDState);
+    isUpdated = UpdateBuiltInLED(deltaTime);
 #endif
 
-    lastLEDUpdateTime = now;
+    if (isUpdated) {
+        lastLEDUpdateTime = now;
+    }
 }
 
 void keypad::KeyPad::Step() {
@@ -350,6 +264,134 @@ void keypad::KeyPad::UpdateLED(int pin, int value) {
     }
 
     digitalWrite(pin, value);
+}
+
+bool keypad::KeyPad::UpdateExternalLED(unsigned long deltaTime) {
+    bool isUpdated = false;
+
+    // -------------------------------------------------------------------------
+    // Red
+    if (recorder.IsRecording()) {
+        // recording macro
+        unsigned int spareSpace = recorder.SpareSpace();
+        unsigned int capacity = recorder.Capacity();
+        float percentage = float(spareSpace) / float(capacity);
+
+        if (percentage > 0.5) {
+            redLEDPin = HIGH;
+            isUpdated = true;
+        } else if (percentage > 0) {
+            unsigned long gap = ULONG_MAX;
+            if (percentage > 0.25) {
+                gap = SLOW_BLINK_TIME;
+            } else if (percentage > 0.125) {
+                gap = FAST_BLINK_TIME;
+            } else if (percentage > 0) {
+                gap = SUPER_FAST_BLINK_TIME;
+            }
+
+            if (deltaTime >= gap) {
+                redLEDState = !redLEDState;
+                isUpdated = true;
+            }
+        } else {
+            redLEDState = LOW;
+            isUpdated = true;
+        }
+    }
+    UpdateLED(redLEDPin, redLEDState);
+
+    // -------------------------------------------------------------------------
+    // Orange
+    if (changeHandlerLEDBlinkCnt > 0) {
+        orangeLEDState = !orangeLEDState;
+        if (!orangeLEDState) {
+            --changeHandlerLEDBlinkCnt;
+        }
+        isUpdated = true;
+    }
+    UpdateLED(orangeLEDPin, orangeLEDState);
+
+    // -------------------------------------------------------------------------
+    // Yellow
+    if (handler->Dirty()) {
+        // normal state
+        yellowLEDState = HIGH;
+        isUpdated = true;
+    }
+    UpdateLED(yellowLEDPin, yellowLEDState);
+
+    // -------------------------------------------------------------------------
+    // Blue
+    if (macroPlayer.CheckIsMacroPlaying()) {
+        // playing macro
+        if (deltaTime >= SLOW_BLINK_TIME) {
+            blueLEDState = !blueLEDState;
+            isUpdated = true;
+        }
+    }
+    UpdateLED(blueLEDPin, blueLEDState);
+
+    return isUpdated;
+}
+
+bool keypad::KeyPad::UpdateBuiltInLED(unsigned long deltaTime) {
+    bool isUpdated = false;
+
+    if (recorder.IsRecording()) {
+        // recording macro
+        unsigned int spareSpace = recorder.SpareSpace();
+        unsigned int capacity = recorder.Capacity();
+        float percentage = float(spareSpace) / float(capacity);
+
+        if (percentage > 0.75) {
+            builtInLEDState = LOW;
+            isUpdated = true;
+        } else if (percentage > 0) {
+            unsigned long gap = ULONG_MAX;
+            if (percentage > 0.5) {
+                gap = SLOW_BLINK_TIME;
+            } if (percentage > 0.25) {
+                gap = NORMAL_BLINK_TIME;
+            } else if (percentage > 0.125) {
+                gap = FAST_BLINK_TIME;
+            } else if (percentage > 0) {
+                gap = SUPER_FAST_BLINK_TIME;
+            }
+
+            if (deltaTime >= gap) {
+                builtInLEDState = !builtInLEDState;
+                isUpdated = true;
+            }
+        } else {
+            builtInLEDState = HIGH;
+            isUpdated = true;
+        }
+    } else if (changeHandlerLEDBlinkCnt > 0) {
+        if (deltaTime >= SUPER_FAST_BLINK_TIME) {
+            builtInLEDState = !builtInLEDState;
+
+            if (builtInLEDState == HIGH) {
+                --changeHandlerLEDBlinkCnt;
+            }
+
+            isUpdated = true;
+        }
+        
+    } else if (macroPlayer.CheckIsMacroPlaying()) {
+        // playing macro
+        if (deltaTime >= NORMAL_BLINK_TIME) {
+            builtInLEDState = !builtInLEDState;
+            isUpdated = true;
+        }
+    } else {
+        builtInLEDState = HIGH;
+        isUpdated = true;
+    }
+
+    digitalWrite(LED_BUILTIN, builtInLEDState);
+
+    return isUpdated;
 }
 
 // -----------------------------------------------------------------------------
