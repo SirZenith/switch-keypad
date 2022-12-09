@@ -486,6 +486,7 @@ void keypad::KeyPad::OnKeyReleased(int r, int c) {
 void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int layer) {
     switch (re.type) {
     case Operation::MACRO:
+        handler->ReleaseAll();
         macroPlayer.isAllowedToPlay = false;
         macroPlayer.ToggleMacro(handler->GetMacro(re.param), r, c);
         break;
@@ -496,6 +497,7 @@ void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int laye
         recorder.ToggleRecording(true);
         break;
     case Operation::MACRO_PLAY_RECORDED:
+        handler->ReleaseAll();
         macroPlayer.isAllowedToPlay = false;
         macroPlayer.ToggleMacro(recorder.GetMacro(), r, c);
         break;

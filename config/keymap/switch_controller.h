@@ -42,7 +42,7 @@ namespace config::switch_controller {
         MACRO_PLAY_RECORDED,
     };
 
-    const Record *keyMap[] = {
+    const Record *keymap[] = {
         baseLayer,
         functionKeyLayer,
         macroLayer,

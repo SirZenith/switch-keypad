@@ -2,29 +2,29 @@
 
 // -----------------------------------------------------------------------------
 
-backend::SwitchController::SwitchController(
+handler::SwitchController::SwitchController(
     const keypad::Record **keyMap,
     const keypad::MacroRecord **macroList,
     unsigned int defaultLayer
 ) : KeyHandler(keyMap, macroList, defaultLayer) {}
 
-void backend::SwitchController::Begin() {
+void handler::SwitchController::Begin() {
     switch_controller::controller.Begin();
 }
 
-void backend::SwitchController::End() {
+void handler::SwitchController::End() {
     switch_controller::controller.End();
 }
 
-bool backend::SwitchController::Ready() {
+bool handler::SwitchController::Ready() {
     return switch_controller::controller.Ready();
 }
 
-bool backend::SwitchController::Dirty() {
+bool handler::SwitchController::Dirty() {
     return isDirty;
 }
 
-void backend::SwitchController::Send() {
+void handler::SwitchController::Send() {
     if (isDirty) {
         switch_controller::controller.SendReport();
         isDirty = false;
@@ -33,23 +33,27 @@ void backend::SwitchController::Send() {
 
 // -----------------------------------------------------------------------------
 
-void backend::SwitchController::Press(unsigned long param) {
+void handler::SwitchController::Press(unsigned long param) {
     switch_controller::controller.Press((switch_controller::KeyCode)param);
     isDirty = true;
 }
 
-void backend::SwitchController::Release(unsigned long param) {
+void handler::SwitchController::Release(unsigned long param) {
     switch_controller::controller.Release((switch_controller::KeyCode)param);
     isDirty = true;
 }
 
+void handler::SwitchController::ReleaseAll() {
+    switch_controller::controller.Reset();
+}
+
 // -----------------------------------------------------------------------------
 
-const char *backend::SwitchController::Name() {
+const char *handler::SwitchController::Name() {
     return "Switch Controller";
 }
 
-void backend::SwitchController::OperationLog(const char *msg, const keypad::MacroRecord *re) {
+void handler::SwitchController::OperationLog(const char *msg, const keypad::MacroRecord *re) {
     Serial.print(msg);
 
     if (re != nullptr) {

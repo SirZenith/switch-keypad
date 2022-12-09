@@ -6,15 +6,15 @@ namespace keypad {
     class KeyHandler {
     public:
         KeyHandler(
-            const Record **keyMap,
+            const Record **keymap,
             const MacroRecord **macroList,
             unsigned int defaultLayer
-        ) : keyMap{keyMap},
+        ) : keymap{keymap},
             macroList{macroList},
             defaultLayer{defaultLayer} {
 
             layerCnt = 0;
-            for (; keyMap[layerCnt] != nullptr; ++layerCnt) {
+            for (; keymap[layerCnt] != nullptr; ++layerCnt) {
             }
 
             macroCnt = 0;
@@ -35,12 +35,13 @@ namespace keypad {
 
         virtual void Press(unsigned long param) = 0;
         virtual void Release(unsigned long param) = 0;
+        virtual void ReleaseAll() = 0;
 
         virtual const char *Name() = 0;
         virtual void OperationLog(const char *msg, const MacroRecord *re) = 0;
 
         const Record &GetRecord(int layer, int index) {
-            return keyMap[layer][index];
+            return keymap[layer][index];
         }
 
         const MacroRecord *GetMacro(int index) {
@@ -48,7 +49,7 @@ namespace keypad {
         }
 
     protected:
-        const Record **keyMap = nullptr;
+        const Record **keymap = nullptr;
         const MacroRecord **macroList = nullptr;
 
         unsigned int layerCnt = 0;

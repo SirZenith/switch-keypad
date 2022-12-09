@@ -20,7 +20,7 @@ namespace config::keyboard {
         PR_KEY_RIGHT_ARROW,
     };
 
-    const Record *keyMap[] = {
+    const Record *keymap[] = {
         arrowKeyLayer,
         NULL,
     };

@@ -2,29 +2,29 @@
 
 // -----------------------------------------------------------------------------
 
-backend::Keyboard::Keyboard(
+handler::Keyboard::Keyboard(
     const keypad::Record **keyMap,
     const keypad::MacroRecord **macroList,
     unsigned int defaultLayer
 ) : KeyHandler(keyMap, macroList, defaultLayer) {}
 
-void backend::Keyboard::Begin() {
+void handler::Keyboard::Begin() {
     ::Keyboard.begin();
 }
 
-void backend::Keyboard::End() {
+void handler::Keyboard::End() {
     ::Keyboard.end();
 }
 
-bool backend::Keyboard::Ready() {
+bool handler::Keyboard::Ready() {
     return true;
 }
 
-bool backend::Keyboard::Dirty() {
+bool handler::Keyboard::Dirty() {
     return isDirty;
 }
 
-void backend::Keyboard::Send() {
+void handler::Keyboard::Send() {
     if (isDirty) {
         isDirty = false;
     }
@@ -32,23 +32,27 @@ void backend::Keyboard::Send() {
 
 // -----------------------------------------------------------------------------
 
-void backend::Keyboard::Press(unsigned long param) {
+void handler::Keyboard::Press(unsigned long param) {
     ::Keyboard.press(param);
     isDirty = true;
 }
 
-void backend::Keyboard::Release(unsigned long param) {
+void handler::Keyboard::Release(unsigned long param) {
     ::Keyboard.release(param);
     isDirty = true;
 }
 
+void handler::Keyboard::ReleaseAll() {
+    ::Keyboard.releaseAll();
+}
+
 // -----------------------------------------------------------------------------
 
-const char *backend::Keyboard::Name() {
+const char *handler::Keyboard::Name() {
     return "Keyboard";
 }
 
-void backend::Keyboard::OperationLog(const char *msg, const keypad::MacroRecord *re) {
+void handler::Keyboard::OperationLog(const char *msg, const keypad::MacroRecord *re) {
     Serial.print(msg);
     if (re != nullptr) {
         Serial.print(keypad::GetOperatioinName(re->type));

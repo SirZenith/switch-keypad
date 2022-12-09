@@ -26,7 +26,7 @@ namespace keypad {
         TOGGLE_LAYER,
         DEFAULT_LAYER,
         // -----------------------------------------------------------------------------
-        // backend
+        // handler
         CHANGE_HANDLER,
         // --------------------------------------------------------------------
         // button operation

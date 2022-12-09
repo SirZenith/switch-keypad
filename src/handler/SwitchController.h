@@ -4,7 +4,7 @@
 
 #include "../KeyHandler.h"
 
-namespace backend {
+namespace handler {
     class SwitchController : keypad::KeyHandler {
     public:
         SwitchController(
@@ -24,6 +24,7 @@ namespace backend {
 
         void Press(unsigned long param);
         void Release(unsigned long param);
+        void ReleaseAll();
 
         const char *Name();
         void OperationLog(const char *msg, const keypad::MacroRecord *re);
