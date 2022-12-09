@@ -1,13 +1,12 @@
 #pragma once
 
-#include "../src/common.h"
-#include "../src/keycode/common.h"
-#include "../src/keycode/switch.h"
-#include "../src/keycode/keyboard.h"
+#include "../../src/common.h"
+#include "../../src/keycode/common.h"
+#include "../../src/keycode/switch.h"
+#include "../../src/keycode/keyboard.h"
 
-namespace config {
+namespace config::switch_controller {
     using keypad::MacroRecord;
-    using switch_controller::KeyCode;
 
     const unsigned long SMALL_DIALOG_DELAY = 100;
     const unsigned long MEDIUM_DIALOG_DELAY = 300;

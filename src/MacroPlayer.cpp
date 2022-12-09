@@ -1,15 +1,8 @@
 #include "MacroPlayer.h"
 
-keypad::MacroPlayer::MacroPlayer(
-    const MacroRecord **macroList,
-    unsigned long clickDelay, unsigned long clickEndDelay
-) : macroList{macroList},
-    clickDelay{clickDelay},
-    clickEndDelay{clickEndDelay} {
-
-    for (macroCnt = 0; macroList[macroCnt] != nullptr; ++macroCnt) {
-    }
-}
+keypad::MacroPlayer::MacroPlayer(unsigned long clickDelay, unsigned long clickEndDelay)
+    : clickDelay{clickDelay},
+      clickEndDelay{clickEndDelay} {}
 
 // ----------------------------------------------------------------------------
 
@@ -61,15 +54,6 @@ void keypad::MacroPlayer::Unbind() {
     curPlaying = nullptr;
 }
 
-void keypad::MacroPlayer::ToggleIndex(int index, int r, int c) {
-    row = r;
-    col = c;
-    macro = !CheckHasMacroBinded() && index < macroCnt
-                ? macroList[index]
-                : nullptr;
-    curPlaying = nullptr;
-}
-
 void keypad::MacroPlayer::ToggleMacro(const MacroRecord *m, int r, int c) {
     row = r;
     col = c;
@@ -78,7 +62,8 @@ void keypad::MacroPlayer::ToggleMacro(const MacroRecord *m, int r, int c) {
 
     if (macro != nullptr) {
         int cnt = 0;
-        for (; m[cnt].type != Operation::END; ++cnt) {}
+        for (; m[cnt].type != Operation::END; ++cnt) {
+        }
         Serial.print("record length: ");
         Serial.print(cnt);
         Serial.print("\n");

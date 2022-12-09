@@ -19,8 +19,6 @@ namespace keypad {
         KeyPad(
             int *rowPinList, int *colPinList,
             unsigned long debounce, unsigned long holdThreshold,
-
-            const Record **keyMap,
             MacroPlayer &macroPlayer,
             KeyHandler **handlers
         );
@@ -48,8 +46,6 @@ namespace keypad {
         int row, col;
         int *rowPinList, *colPinList;
         unsigned long debounce, holdThreshold;
-
-        const Record **keyMap;
 
         Key **keyMatrix;
         LayeringState layeringState;

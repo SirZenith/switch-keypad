@@ -13,6 +13,7 @@ namespace keypad {
 
         int GetLayerCnt();
         int SetLayerCnt(int cnt);
+        void Reset();
         int SetDefaultLayer(int layer);
         int GetCurLayer();
         bool IsInOneShotState();

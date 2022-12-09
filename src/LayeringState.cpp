@@ -18,6 +18,13 @@ int keypad::LayeringState::SetLayerCnt(int cnt) {
     return layerCnt;
 }
 
+void keypad::LayeringState::Reset() {
+    layerStateRecord = 0;
+    defaultLayer = 0;
+    curLayer = 0;
+    oneShotLayer = NO_LAYER;
+}
+
 int keypad::LayeringState::SetDefaultLayer(int layer) {
     defaultLayer = layer >= 0 && layer < MAX_LAYER_CNT ? layer : defaultLayer;
     UpdateCurLayer();
@@ -100,7 +107,7 @@ void keypad::LayeringState::UpdateCurLayer() {
 
     unsigned long value = layerStateRecord << (MAX_LAYER_CNT - layerCnt);
     for (int l = layerCnt - 1; l >= 0; --l, value <<= 1) {
-        if (value & LAYER_CHECK_MASK) {
+        if (value & LAYER_CHECK_MASK && l < layerCnt) {
             OperationLog("update-layer", l);
 
             curLayer = l;

@@ -3,12 +3,11 @@
 #include "config/config.h"
 #include "src/KeyPad.h"
 
-auto macroPlayer = keypad::MacroPlayer(config::macroList, config::clickDelay, config::clickEndDelay);
+auto macroPlayer = keypad::MacroPlayer(config::clickDelay, config::clickEndDelay);
 
 auto pad = keypad::KeyPad(
     config::rowPinList, config::colPinList,
     config::debounce, config::holdThreshold,
-    config::keyMap,
     macroPlayer,
     config::handlers
 );

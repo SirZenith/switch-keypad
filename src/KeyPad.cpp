@@ -5,12 +5,10 @@
 keypad::KeyPad::KeyPad(
     int *rowPinList, int *colPinList,
     unsigned long debounce, unsigned long holdThreshold,
-    const Record **keyMap,
     MacroPlayer &macroPlayer,
     KeyHandler **handlers
 ) : rowPinList{rowPinList}, colPinList{colPinList},
     debounce{debounce}, holdThreshold{holdThreshold},
-    keyMap{keyMap},
     macroPlayer{macroPlayer},
     handlers{handlers} {
 
@@ -31,11 +29,6 @@ keypad::KeyPad::KeyPad(
 
     for (handlerCnt = 0; handlers[handlerCnt] != nullptr; ++handlerCnt) {
     }
-
-    int layerCnt = 0;
-    for (; keyMap[layerCnt] != nullptr; ++layerCnt) {
-    }
-    layeringState.SetLayerCnt(layerCnt);
 }
 
 keypad::KeyPad::~KeyPad() {
@@ -100,14 +93,20 @@ void keypad::KeyPad::SetHandler(int index) {
 
     if (handler == newHandler || newHandler == nullptr) {
         return;
-    } else if (handler != nullptr) {
+    }
+
+    if (handler != nullptr) {
         handler->End();
     }
 
     handler = newHandler;
-
     handler->Begin();
+
+    layeringState.Reset();
     layeringState.SetDefaultLayer(handler->DefaultLayer());
+    layeringState.SetLayerCnt(handler->LayerCnt());
+
+    macroPlayer.Unbind();
 
     changeHandlerLEDBlinkCnt = CHANGE_HANDLER_LED_BLINK_CNT;
 }
@@ -285,7 +284,7 @@ void keypad::KeyPad::UpdateLEDs() {
         float percentage = float(spareSpace) / float(capacity);
 
         if (percentage > 0.5) {
-            builtInLEDState  = LOW;
+            builtInLEDState = LOW;
         } else if (percentage > 0) {
             unsigned long gap = ULONG_MAX;
             if (percentage > 0.25) {
@@ -437,7 +436,7 @@ void keypad::KeyPad::OnKeyPressed(int r, int c) {
     int layer = key.layer != LayeringState::NO_LAYER
                     ? key.layer
                     : layeringState.GetCurLayer();
-    const Record &re = keyMap[layer][r * col + c];
+    const Record &re = handler->GetRecord(layer, r * col + c);
 
     if (layeringState.IsInOneShotState()) {
         layeringState.OneShotLayerOff();
@@ -454,7 +453,7 @@ void keypad::KeyPad::OnKeyHeld(int r, int c) {
     int layer = key.layer != LayeringState::NO_LAYER
                     ? key.layer
                     : layeringState.GetCurLayer();
-    const Record &re = keyMap[layer][r * col + c];
+    const Record &re = handler->GetRecord(layer, r * col + c);
 
     if (re.onHold != nullptr) {
         OperationLog("hold: ", re.onHold);
@@ -468,7 +467,7 @@ void keypad::KeyPad::OnKeyReleased(int r, int c) {
     int layer = key.layer != LayeringState::NO_LAYER
                     ? key.layer
                     : layeringState.GetCurLayer();
-    const Record &re = keyMap[layer][r * col + c];
+    const Record &re = handler->GetRecord(layer, r * col + c);
 
     if (re.onHold == nullptr) {
         DoKeyRelease(key, re, r, c, layer);
@@ -488,7 +487,7 @@ void keypad::KeyPad::DoKeyTap(Key &key, const Record &re, int r, int c, int laye
     switch (re.type) {
     case Operation::MACRO:
         macroPlayer.isAllowedToPlay = false;
-        macroPlayer.ToggleIndex(re.param, r, c);
+        macroPlayer.ToggleMacro(handler->GetMacro(re.param), r, c);
         break;
     case Operation::MACRO_RECORD:
         recorder.ToggleRecording(false);

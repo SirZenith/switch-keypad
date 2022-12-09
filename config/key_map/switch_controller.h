@@ -1,21 +1,13 @@
 #pragma once
 
-#include "../src/common.h"
-#include "../src/keycode/common.h"
+#include "../../src/common.h"
+#include "../../src/keycode/common.h"
+#include "../../src/keycode/switch.h"
 
-#ifdef USE_SWITCH_CONTROLLER
-#include "../src/keycode/switch.h"
-#endif
-
-#ifdef USE_KEYBOARD
-#include "../src/keycode/keyboard.h"
-#endif
-
-namespace config {
+namespace config::switch_controller {
     using keypad::Record;
 
-    unsigned int switchControllerDFL = 0;
-    unsigned int keyboardDFL = 3;
+    const unsigned int defaultLayer = 0;
 
     const Record baseLayer[] = {
         // row1
@@ -50,22 +42,10 @@ namespace config {
         MACRO_PLAY_RECORDED,
     };
 
-    const Record keyboardLayer[] = {
-        // row1
-        ML(0),
-        PR_KEY_UP_ARROW,
-        HANDLER(0),
-        // row2
-        PR_KEY_LEFT_ARROW,
-        PR_KEY_DOWN_ARROW,
-        PR_KEY_RIGHT_ARROW,
-    };
-
     const Record *keyMap[] = {
         baseLayer,
         functionKeyLayer,
         macroLayer,
-        keyboardLayer,
         NULL,
     };
 }

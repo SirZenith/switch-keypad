@@ -2,8 +2,11 @@
 
 // -----------------------------------------------------------------------------
 
-backend::SwitchController::SwitchController(unsigned int defaultLayer)
-    : KeyHandler(defaultLayer) {}
+backend::SwitchController::SwitchController(
+    const keypad::Record **keyMap,
+    const keypad::MacroRecord **macroList,
+    unsigned int defaultLayer
+) : KeyHandler(keyMap, macroList, defaultLayer) {}
 
 void backend::SwitchController::Begin() {
     switch_controller::controller.Begin();

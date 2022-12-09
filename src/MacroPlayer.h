@@ -9,10 +9,7 @@ namespace keypad {
         // when macro is triggered, coordinate of trigger key will be recorded.
         int row = 0, col = 0;
 
-        MacroPlayer(
-            const MacroRecord **macroList,
-            unsigned long clickDelay, unsigned long clickEndDelay
-        );
+        MacroPlayer(unsigned long clickDelay, unsigned long clickEndDelay);
 
         void Delay(unsigned long);
         void ClickDelay();
@@ -28,8 +25,8 @@ namespace keypad {
         void ToggleMacro(const MacroRecord *m, int r, int c);
 
         const MacroRecord *Next();
+
     private:
-        const MacroRecord **macroList = nullptr;
         const MacroRecord *macro = nullptr;
         const MacroRecord *curPlaying = nullptr;
 

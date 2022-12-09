@@ -1,20 +1,23 @@
 #pragma once
 
-#include <SwitchController.h>
+#include <TinyUSB_Mouse_and_Keyboard.h>
 
 #include "../KeyHandler.h"
 
 namespace backend {
-    class SwitchController : keypad::KeyHandler {
+    class Keyboard : keypad::KeyHandler {
     public:
-        SwitchController(unsigned int defaultLayer);
+        Keyboard(
+            const keypad::Record **keyMap,
+            const keypad::MacroRecord **macroList,
+            unsigned int defaultLayer
+        );
 
         void Begin();
         void End();
 
         bool Ready();
         bool Dirty();
-        // unsigned int 
 
         void Send();
 

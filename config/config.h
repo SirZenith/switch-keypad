@@ -9,8 +9,6 @@
 // -----------------------------------------------------------------------------
 
 #include "../src/KeyPad.h"
-#include "key_map.h"
-#include "macro.h"
 #include "handlers.h"
 
 namespace config {

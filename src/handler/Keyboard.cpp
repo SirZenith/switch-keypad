@@ -2,8 +2,11 @@
 
 // -----------------------------------------------------------------------------
 
-backend::Keyboard::Keyboard(unsigned int defaultLayer)
-    : KeyHandler(defaultLayer) {}
+backend::Keyboard::Keyboard(
+    const keypad::Record **keyMap,
+    const keypad::MacroRecord **macroList,
+    unsigned int defaultLayer
+) : KeyHandler(keyMap, macroList, defaultLayer) {}
 
 void backend::Keyboard::Begin() {
     ::Keyboard.begin();
