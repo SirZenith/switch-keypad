@@ -60,13 +60,17 @@ void keypad::KeyPad::LogState() {
     Serial.print("\n");
 
     Serial.print("layers: ");
+    Serial.print(layeringState.GetCurLayer() + 1);
+    Serial.print("/");
     Serial.print(layeringState.GetLayerCnt());
     Serial.print("\n");
 
     Serial.print("handlers: ");
     Serial.print(handlerCnt);
-    // Serial.print(", ");
-    // Serial.print(handler == nullptr);
+    if (handler != nullptr) {
+        Serial.print(" - ");
+        Serial.print(handler->Name());
+    }
     Serial.print("\n");
 
     Serial.println("-------------------------------");
@@ -88,11 +92,24 @@ void keypad::KeyPad::SetLEDPin(int red, int orange, int yellow, int blue) {
 }
 
 void keypad::KeyPad::SetHandler(int index) {
-    handler = index < handlerCnt ? handlers[index] : handler;
-    if (handler != nullptr) {
-        layeringState.SetDefaultLayer(handler->DefaultLayer());
-        changeHandlerLEDBlinkCnt = CHANGE_HANDLER_LED_BLINK_CNT;
+    if (index < 0 || index >= handlerCnt) {
+        return;
     }
+
+    KeyHandler *newHandler = handlers[index];
+
+    if (handler == newHandler || newHandler == nullptr) {
+        return;
+    } else if (handler != nullptr) {
+        handler->End();
+    }
+
+    handler = newHandler;
+
+    handler->Begin();
+    layeringState.SetDefaultLayer(handler->DefaultLayer());
+
+    changeHandlerLEDBlinkCnt = CHANGE_HANDLER_LED_BLINK_CNT;
 }
 
 // -----------------------------------------------------------------------------

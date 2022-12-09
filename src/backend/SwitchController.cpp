@@ -42,6 +42,10 @@ void backend::SwitchController::Release(unsigned long param) {
 
 // -----------------------------------------------------------------------------
 
+const char *backend::SwitchController::Name() {
+    return "Switch Controller";
+}
+
 void backend::SwitchController::OperationLog(const char *msg, const keypad::MacroRecord *re) {
     Serial.print(msg);
 

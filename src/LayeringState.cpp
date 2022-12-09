@@ -19,7 +19,8 @@ int keypad::LayeringState::SetLayerCnt(int cnt) {
 }
 
 int keypad::LayeringState::SetDefaultLayer(int layer) {
-    defaultLayer = layer > 0 && layer < MAX_LAYER_CNT ? layer : defaultLayer;
+    defaultLayer = layer >= 0 && layer < MAX_LAYER_CNT ? layer : defaultLayer;
+    UpdateCurLayer();
     OperationLog("set-default", defaultLayer);
     return defaultLayer;
 }

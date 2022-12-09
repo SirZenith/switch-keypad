@@ -19,6 +19,7 @@ namespace keypad {
         virtual void Press(unsigned long param) = 0;
         virtual void Release(unsigned long param) = 0;
 
+        virtual const char *Name() = 0;
         virtual void OperationLog(const char *msg, const MacroRecord *re) = 0;
     protected:
         unsigned int defaultLayer = 0;

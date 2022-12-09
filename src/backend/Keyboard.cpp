@@ -41,5 +41,17 @@ void backend::Keyboard::Release(unsigned long param) {
 
 // -----------------------------------------------------------------------------
 
+const char *backend::Keyboard::Name() {
+    return "Keyboard";
+}
+
 void backend::Keyboard::OperationLog(const char *msg, const keypad::MacroRecord *re) {
+    Serial.print(msg);
+    if (re != nullptr) {
+        Serial.print(keypad::GetOperatioinName(re->type));
+        Serial.print("(");
+        Serial.print(re->param);
+        Serial.print(")");
+    }
+    Serial.print("\n");
 }

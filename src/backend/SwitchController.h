@@ -21,6 +21,7 @@ namespace backend {
         void Press(unsigned long param);
         void Release(unsigned long param);
 
+        const char *Name();
         void OperationLog(const char *msg, const keypad::MacroRecord *re);
     private:
         bool isDirty = false;

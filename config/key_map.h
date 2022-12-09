@@ -15,7 +15,7 @@ namespace config {
     using keypad::Record;
 
     unsigned int switchControllerDFL = 0;
-    unsigned int keyboardDFL = 0;
+    unsigned int keyboardDFL = 3;
 
     const Record baseLayer[] = {
         // row1
@@ -45,15 +45,27 @@ namespace config {
         MACRO(0),
         MACRO(1),
         // row2
-        EMPTY,
+        HANDLER(1),
         HOLD(MACRO_RECORD, MACRO_RECORD_LOOP),
         MACRO_PLAY_RECORDED,
+    };
+
+    const Record keyboardLayer[] = {
+        // row1
+        ML(0),
+        PR_KEY_UP_ARROW,
+        HANDLER(0),
+        // row2
+        PR_KEY_LEFT_ARROW,
+        PR_KEY_DOWN_ARROW,
+        PR_KEY_RIGHT_ARROW,
     };
 
     const Record *keyMap[] = {
         baseLayer,
         functionKeyLayer,
         macroLayer,
+        keyboardLayer,
         NULL,
     };
 }

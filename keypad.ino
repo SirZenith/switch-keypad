@@ -18,8 +18,7 @@ void setup() {
     Serial.begin(115200);
 #endif
 
-    pad.SetHandler(0);
-    pad.Begin();
+    pad.SetHandler(1);
 
 #ifdef USE_LED
     pinMode(config::ledRedPin, OUTPUT);
