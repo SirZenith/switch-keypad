@@ -21,7 +21,6 @@ namespace keypad {
         const MacroRecord *GetMacro();
         bool CheckIsMacroPlaying();
         void Unbind();
-        void ToggleIndex(int index, int r, int c);
         void ToggleMacro(const MacroRecord *m, int r, int c);
 
         const MacroRecord *Next();

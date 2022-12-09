@@ -200,7 +200,7 @@ void keypad::KeyPad::PlayMacro() {
         handler->Release(re->param);
         break;
     case Operation::CLICK:
-        if (!macroPlayer.CheckNeedClick()) {
+        if (macroPlayer.CheckNeedClick()) {
             handler->Press(re->param);
             macroPlayer.ClickDelay();
         } else {

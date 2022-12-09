@@ -71,16 +71,19 @@ void keypad::MacroPlayer::ToggleMacro(const MacroRecord *m, int r, int c) {
 }
 
 const keypad::MacroRecord *keypad::MacroPlayer::Next() {
+    if (isNeedClick) {
+        isNeedClick = false;
+        return curPlaying;
+    }
+
     if (curPlaying == nullptr || curPlaying->type == Operation::END) {
         curPlaying = macro;
-    } else if (isNeedClick) {
-        isNeedClick = false;
     } else {
         ++curPlaying;
+    }
 
-        if (curPlaying->type == Operation::CLICK) {
-            isNeedClick = true;
-        }
+    if (curPlaying->type == Operation::CLICK) {
+        isNeedClick = true;
     }
 
     return curPlaying;
